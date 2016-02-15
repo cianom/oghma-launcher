@@ -30,7 +30,6 @@
                   <Button fx:id="playButton" layoutX="174.0" layoutY="318.0" mnemonicParsing="false" style="-fx-background-color: #55FFCC;" text="play" textFill="WHITE" visible="false" />
                   <Button fx:id="downloadButton" mnemonicParsing="false" style="-fx-background-color: #55CCFF;" text="download" textFill="WHITE" visible="false" />
                   <Button fx:id="cancelDownloadButton" mnemonicParsing="false" style="-fx-background-color: #FF5555;" text="cancel" textFill="WHITE" visible="false" />
-                  <ProgressBar fx:id="downloadProgress" prefHeight="20.0" prefWidth="225.0" progress="0.0" visible="false" />
                </children>
             </VBox>
             <ComboBox fx:id="versions" layoutX="122.0" layoutY="229.0" prefWidth="150.0" style="-fx-background-color: #55CCFF;" />

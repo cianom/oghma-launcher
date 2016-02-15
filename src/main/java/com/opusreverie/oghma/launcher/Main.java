@@ -15,11 +15,12 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
 
+    private static final String TITLE = "oghma";
 
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
-        stage.setTitle("oghma");
+        stage.setTitle(TITLE);
         stage.setResizable(false);
         stage.setScene(new Scene(root));
         stage.show();

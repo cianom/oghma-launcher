@@ -70,9 +70,6 @@ public class Controller implements Initializable {
     @FXML
     ImageView newIcon;
 
-    @FXML
-    ProgressBar downloadProgress;
-
     private final Set<Release> downloaded = new HashSet<>();
 
     private ReleaseInstaller downloader;
@@ -103,7 +100,6 @@ public class Controller implements Initializable {
         downloadButton.setOnAction(evt -> startDownload(versions.getSelectionModel().getSelectedItem()));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setOnAction(evt -> cancelDownload(versions.getSelectionModel().getSelectedItem()));
-        downloadProgress.managedProperty().bind(downloadProgress.visibleProperty());
 
         try {
             new FileSystemInitializer().setUpFileSystemStructure(oghmaAppData);
@@ -130,7 +126,6 @@ public class Controller implements Initializable {
         playButton.setVisible(release.isDownloaded());
         downloadButton.setVisible(!release.isDownloaded());
         cancelDownloadButton.setVisible(false);
-        downloadProgress.setVisible(false);
     }
 
     private void startDownload(final AvailabilityRelease release) {
@@ -138,7 +133,6 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             notifier.notify("Starting download " + release, NotificationType.INFO);
             cancelDownloadButton.setVisible(true);
-//            downloadProgress.setVisible(true);
             downloadButton.setVisible(false);
             versions.setDisable(true);
         });
@@ -147,10 +141,7 @@ public class Controller implements Initializable {
     }
 
     private void updateProgress(final ProgressEvent prog) {
-        Platform.runLater(() -> {
-//            downloadProgress.setProgress(prog.getPercentage());
-            cancelDownloadButton.setText(MessageFormat.format("cancel ({0})", prog.getFormattedPercentage()));
-        });
+        Platform.runLater(() -> cancelDownloadButton.setText(MessageFormat.format("cancel ({0})", prog.getFormattedPercentage())));
     }
 
     private void cancelDownload(final AvailabilityRelease release) {
@@ -158,7 +149,6 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             notifier.notify("Cancelling download " + release, NotificationType.INFO);
             cancelDownloadButton.setVisible(false);
-            downloadProgress.setVisible(false);
             downloadButton.setVisible(true);
             versions.setDisable(false);
         });
@@ -169,7 +159,6 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             notifier.notify("Download completed " + release, NotificationType.INFO);
             cancelDownloadButton.setVisible(false);
-            downloadProgress.setVisible(false);
             downloadButton.setVisible(false);
             playButton.setVisible(true);
             versions.setDisable(false);
@@ -180,7 +169,6 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             notifier.notify(MessageFormat.format("Download failed for {0} - reason: {2}", release, ex.getMessage()), NotificationType.ERROR);
             cancelDownloadButton.setVisible(false);
-            downloadProgress.setVisible(false);
             downloadButton.setVisible(true);
             versions.setDisable(false);
         });
@@ -207,9 +195,7 @@ public class Controller implements Initializable {
         // Merge
         final Set<AvailabilityRelease> selectable = new LinkedHashSet<>();
 
-        downloaded.stream()
-                .map(AvailabilityRelease::downloaded)
-                .forEach(selectable::add);
+        downloaded.stream().map(AvailabilityRelease::downloaded).forEach(selectable::add);
 
         available.stream()
                 .filter(a -> !downloaded.contains(a))
@@ -223,8 +209,6 @@ public class Controller implements Initializable {
 
         return selectable;
     }
-
-
 
     private void updateConnectivity(boolean connectivity) {
         Tooltip tt = new Tooltip(connectivity ? "has connectivity" : "no connectivity to download new versions");

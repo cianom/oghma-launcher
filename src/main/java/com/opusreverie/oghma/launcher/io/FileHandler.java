@@ -1,0 +1,40 @@
+package com.opusreverie.oghma.launcher.io;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+
+/**
+ * Created by keen on 14/02/16.
+ */
+public class FileHandler {
+
+    public boolean exists(final Path file) throws SecurityException {
+        return Files.exists(file);
+    }
+
+    public boolean delete(final Path file) throws SecurityException {
+        return file.toFile().delete();
+    }
+
+    public Path write(final Path file, final byte[] data) throws IOException {
+        return Files.write(file, data);
+    }
+
+    public Path move(final Path source, final Path target, final CopyOption... options) throws IOException {
+        return Files.move(source, target, options);
+    }
+
+    public Path createDirectories(final Path dir, final FileAttribute<?>... attrs) throws IOException {
+        return Files.createDirectories(dir, attrs);
+    }
+
+    public InputStream getInputStream(final Path file) throws IOException {
+        return new FileInputStream(file.toFile());
+    }
+
+}

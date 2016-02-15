@@ -1,7 +1,11 @@
 package com.opusreverie.oghma.launcher.domain;
 
 /**
- * Created by keen on 07/02/16.
+ * Release object decorated with availability information.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class AvailabilityRelease {
 

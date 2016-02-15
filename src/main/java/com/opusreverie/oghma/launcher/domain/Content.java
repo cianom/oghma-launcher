@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by keen on 14/01/16.
+ * Information about a remote file that's available for download.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class Content {
 

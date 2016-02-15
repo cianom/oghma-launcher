@@ -3,7 +3,11 @@ package com.opusreverie.oghma.launcher.ui;
 import javafx.scene.paint.Color;
 
 /**
- * Created by keen on 07/02/16.
+ * Utility class for creating oghons in String format.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class OghonUtils {
 

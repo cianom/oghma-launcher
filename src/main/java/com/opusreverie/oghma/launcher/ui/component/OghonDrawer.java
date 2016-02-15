@@ -11,7 +11,11 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Created by keen on 27/01/16.
+ * Draws oghons with a staggered transition effect on a canvas element.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class OghonDrawer {
 

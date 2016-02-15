@@ -6,7 +6,7 @@ import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.io.FileSystemInitializer;
 import com.opusreverie.oghma.launcher.io.ReleaseDirectoryScanner;
-import com.opusreverie.oghma.launcher.io.download.DownloadsController;
+import com.opusreverie.oghma.launcher.io.download.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
@@ -31,6 +31,13 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 
+/**
+ * UI controller that coordinates between UI components and services layer.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
+ */
 public class Controller implements Initializable {
 
     @FXML
@@ -68,7 +75,7 @@ public class Controller implements Initializable {
 
     private final Set<Release> downloaded = new HashSet<>();
 
-    private DownloadsController downloader;
+    private ReleaseInstaller downloader;
 
     private Notifier notifier;
 
@@ -82,7 +89,7 @@ public class Controller implements Initializable {
 
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
-        downloader = new DownloadsController(oghmaAppData);
+        downloader = new ReleaseInstaller(oghmaAppData);
         notifier = new Notifier(notificationBox);
 
         oghonDrawer.drawDefault();
@@ -108,7 +115,7 @@ public class Controller implements Initializable {
         }
 
         updateConnectivity(false);
-        new ReleaseService(serviceUri).getReleasesWithRetry(0).thenAccept(this::setAvailableReleases);
+        new ReleaseService(serviceUri).getReleasesWithRetry().thenAccept(this::setAvailableReleases);
 
         versions.setOnAction(evt -> selectRelease(versions.getSelectionModel().getSelectedItem()));
     }
@@ -135,7 +142,7 @@ public class Controller implements Initializable {
             downloadButton.setVisible(false);
             versions.setDisable(true);
         });
-        downloader.download(release.getRelease())
+        downloader.install(release.getRelease())
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
 

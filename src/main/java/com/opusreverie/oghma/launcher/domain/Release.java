@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by keen on 27/01/16.
+ * Information on an available binary release and its related content.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class Release {
 

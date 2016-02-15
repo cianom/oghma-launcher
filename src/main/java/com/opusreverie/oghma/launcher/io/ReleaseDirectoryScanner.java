@@ -15,7 +15,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Created by keen on 27/01/16.
+ * Finds releases already installed on the local filesystem.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class ReleaseDirectoryScanner {
 

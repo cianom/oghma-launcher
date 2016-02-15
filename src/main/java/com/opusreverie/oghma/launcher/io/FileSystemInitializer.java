@@ -8,7 +8,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
- * Created by keen on 27/01/16.
+ * Ensures existence of directory structure required to download and install content.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class FileSystemInitializer {
 

@@ -18,7 +18,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Created by keen on 14/02/16.
+ * Test class for {@link PackExtractor}.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PackExtractorTest {

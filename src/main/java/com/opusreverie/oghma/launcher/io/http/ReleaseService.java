@@ -14,7 +14,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Created by keen on 02/02/16.
+ * Retrieves latest release information from remote hosted services.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class ReleaseService {
 
@@ -27,7 +31,7 @@ public class ReleaseService {
         this.host = host;
     }
 
-    public List<Release> getReleases() {
+    private List<Release> getReleases() {
         final String url = MessageFormat.format("http://{0}", host);
 
         final Client client = ClientBuilder.newBuilder()
@@ -40,28 +44,34 @@ public class ReleaseService {
         return target.request(MediaType.APPLICATION_JSON).get(type);
     }
 
-    private List<Release> getReleasesWithDelay(final long delayMillis) {
 
-        try {
-            Thread.sleep(delayMillis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return getReleases();
+    public CompletableFuture<List<Release>> getReleasesWithRetry() {
+        return getReleasesWithRetry(0);
     }
 
-    public CompletableFuture<List<Release>> getReleasesWithRetry(final long delayMillis) {
+    private CompletableFuture<List<Release>> getReleasesWithRetry(final long delayMillis) {
         return CompletableFuture.supplyAsync(() -> getReleasesWithDelay(delayMillis))
                 .handle((list, ex) -> {
                     if (ex == null) {
                         return CompletableFuture.completedFuture(list);
                     } else {
-                        System.out.println(ex.getMessage());
-                        long backoff = Math.min(MAX_BACKOFF_MILLIS, Math.max(INITIAL_BACKOFF_MILLIS, delayMillis + 1000));
-                        return getReleasesWithRetry(backoff);
+                        System.out.println(ex.getMessage()); //TODO LOg OR NOTIFY
+                        long backOff = Math.min(MAX_BACKOFF_MILLIS, Math.max(INITIAL_BACKOFF_MILLIS, delayMillis + 1000));
+                        return getReleasesWithRetry(backOff);
                     }
                 })
                 .thenCompose(x -> x);
+    }
+
+    private List<Release> getReleasesWithDelay(final long delayMillis) {
+        try {
+            if (delayMillis > 0) {
+                Thread.sleep(delayMillis);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return getReleases();
     }
 
 }

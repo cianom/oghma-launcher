@@ -12,7 +12,11 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 /**
- * Created by keen on 08/02/16.
+ * Notification service to present user with helpful event notifications.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class Notifier {
 

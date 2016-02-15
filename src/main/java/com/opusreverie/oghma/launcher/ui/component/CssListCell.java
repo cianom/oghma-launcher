@@ -3,7 +3,11 @@ package com.opusreverie.oghma.launcher.ui.component;
 import javafx.scene.control.ListCell;
 
 /**
- * Created by keen on 07/02/16.
+ * List Cell with CSS font formatting.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class CssListCell<T> extends ListCell<T> {
 

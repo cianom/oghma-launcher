@@ -1,24 +1,33 @@
 package com.opusreverie.oghma.launcher.common;
 
 /**
- * Created by keen on 27/01/16.
+ * Generic unchecked Launcher exception.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
-public class LauncherException extends RuntimeException {
+public class LauncherException extends RuntimeException
+{
 
-    public LauncherException(String message) {
+    public LauncherException(String message)
+    {
         super(message);
     }
 
-    public LauncherException(String message, Throwable cause) {
+    public LauncherException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public LauncherException(Throwable cause) {
+    public LauncherException(Throwable cause)
+    {
         super(cause);
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return getLocalizedMessage();
     }
 

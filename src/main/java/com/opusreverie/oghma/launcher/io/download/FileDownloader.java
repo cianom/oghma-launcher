@@ -17,7 +17,11 @@ import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
- * Created by keen on 07/02/16.
+ * Downloads a specified file and performs hash validation once complete.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class FileDownloader {
 

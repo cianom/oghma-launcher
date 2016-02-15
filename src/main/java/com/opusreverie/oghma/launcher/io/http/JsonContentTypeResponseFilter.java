@@ -9,15 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by keen on 02/02/16.
+ * Filter that sets the {@value CONTENT_TYPE} HTML response header to application/json.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
-public class JsonContentTypeResponseFilter implements ClientResponseFilter {
+public class JsonContentTypeResponseFilter implements ClientResponseFilter
+{
+
+    private static final String CONTENT_TYPE = "Content-Type";
 
     @Override
-    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-        List<String> contentType = new ArrayList<>(1);
+    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException
+    {
+        final List<String> contentType = new ArrayList<>(1);
         contentType.add(MediaType.APPLICATION_JSON);
-        responseContext.getHeaders().put("Content-Type", contentType);
+        responseContext.getHeaders().put(CONTENT_TYPE, contentType);
     }
 
 }

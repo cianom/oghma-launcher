@@ -9,7 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 
 /**
- * Created by keen on 14/02/16.
+ * Handler for basic filesystem operations.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class FileHandler {
 

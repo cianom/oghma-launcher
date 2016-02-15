@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by keen on 27/01/16.
+ * JSON decoder that de-serializes incoming JSON streams into objects.
+ * <p>
+ * Copyright © 2016 Cian O'Mahony. All rights reserved.
+ *
+ * @author Cian O'Mahony
  */
 public class Decoder {
 

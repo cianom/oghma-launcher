@@ -55,7 +55,7 @@ public class ReleaseService {
                     if (ex == null) {
                         return CompletableFuture.completedFuture(list);
                     } else {
-                        System.out.println(ex.getMessage()); //TODO LOg OR NOTIFY
+                        System.out.println(ex.getMessage());
                         long backOff = Math.min(MAX_BACKOFF_MILLIS, Math.max(INITIAL_BACKOFF_MILLIS, delayMillis + 1000));
                         return getReleasesWithRetry(backOff);
                     }

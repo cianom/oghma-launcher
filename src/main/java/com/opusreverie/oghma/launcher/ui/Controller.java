@@ -4,14 +4,16 @@ import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.Release;
+import com.opusreverie.oghma.launcher.io.FileHandler;
 import com.opusreverie.oghma.launcher.io.FileSystemInitializer;
-import com.opusreverie.oghma.launcher.io.ReleaseDirectoryScanner;
-import com.opusreverie.oghma.launcher.io.download.ReleaseInstaller;
+import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
+import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
+import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
 import com.opusreverie.oghma.launcher.ui.component.Notifier.NotificationType;
-import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.OghonDrawer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -19,7 +21,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -72,7 +77,7 @@ public class Controller implements Initializable {
 
     private final Set<Release> downloaded = new HashSet<>();
 
-    private ReleaseInstaller downloader;
+    private ReleaseInstaller installer;
 
     private Notifier notifier;
 
@@ -84,9 +89,11 @@ public class Controller implements Initializable {
         final Path oghmaAppData = Paths.get(System.getProperty("user.home"), ".oghma");
         final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/backend");
 
+        DirectoryResolver dirResolver = new DirectoryResolver(oghmaAppData);
+        LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
-        downloader = new ReleaseInstaller(oghmaAppData);
+        installer = new ReleaseInstaller(oghmaAppData, releaseRepository);
         notifier = new Notifier(notificationBox);
 
         oghonDrawer.drawDefault();
@@ -103,8 +110,7 @@ public class Controller implements Initializable {
 
         try {
             new FileSystemInitializer().setUpFileSystemStructure(oghmaAppData);
-            Collection<Release> downloaded = new ReleaseDirectoryScanner(new Decoder())
-                    .findAvailableReleases(oghmaAppData.resolve("release/"), notifier);
+            Collection<Release> downloaded = releaseRepository.findAvailableReleases(notifier);
             setSelectableReleases(downloaded, Collections.emptyList());
         } catch (final LauncherException e) {
             notifier.notify(e.toString(), NotificationType.ERROR);
@@ -136,7 +142,7 @@ public class Controller implements Initializable {
             downloadButton.setVisible(false);
             versions.setDisable(true);
         });
-        downloader.install(release.getRelease())
+        installer.install(release.getRelease())
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
 

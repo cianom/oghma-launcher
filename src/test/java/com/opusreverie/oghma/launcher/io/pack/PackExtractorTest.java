@@ -1,7 +1,9 @@
 package com.opusreverie.oghma.launcher.io.pack;
 
 import com.opusreverie.oghma.launcher.domain.Content;
+import com.opusreverie.oghma.launcher.helper.ReactiveResult;
 import com.opusreverie.oghma.launcher.io.FileHandler;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -36,21 +39,24 @@ public class PackExtractorTest {
 
     @Before
     public void setUp() throws Exception {
-        classUnderTest = new PackExtractor(Paths.get("/pack"), mockFileHandler);
+        classUnderTest = new PackExtractor(mockFileHandler, new DirectoryResolver(Paths.get("/pack")));
 
         when(mockFileHandler.exists(any(Path.class))).thenReturn(true, false);
     }
 
     @Test
-    public void testExtract_success() throws Exception {
+    public void testExtract_success() throws Throwable {
         // Given
         when(mockFileHandler.getInputStream(any(Path.class))).then(invocationOnMock ->
                 PackExtractorTest.class.getResourceAsStream(invocationOnMock.getArguments()[0].toString()));
 
         // When
-        classUnderTest.extract(FILE).toBlocking().subscribe();
+        ReactiveResult r = ReactiveResult.of(classUnderTest.extract(FILE));
 
         // Then
+        r.throwAny();
+        assertTrue(r.getCompleted().get());
+        assertTrue(r.getErrors().isEmpty());
         verify(mockFileHandler, times(2)).write(any(Path.class), any(byte[].class));
         verify(mockFileHandler).move(any(Path.class), any(Path.class));
     }

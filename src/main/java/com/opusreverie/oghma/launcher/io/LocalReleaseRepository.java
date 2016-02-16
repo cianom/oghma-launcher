@@ -3,10 +3,12 @@ package com.opusreverie.oghma.launcher.io;
 import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.Release;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -21,20 +23,32 @@ import java.util.stream.Collectors;
  *
  * @author Cian O'Mahony
  */
-public class ReleaseDirectoryScanner {
+public class LocalReleaseRepository {
 
-    private static final String META_FILENAME = "oghma-{0}.json";
-    private static final String RELEASE_FILENAME = "oghma-{0}.jar";
 
     private final Decoder decoder;
 
-    public ReleaseDirectoryScanner(Decoder decoder) {
+    private final DirectoryResolver dirResolver;
+
+    private final FileHandler fileHandler;
+
+    public LocalReleaseRepository(Decoder decoder, DirectoryResolver dirResolver, FileHandler fileHandler) {
         this.decoder = decoder;
+        this.dirResolver = dirResolver;
+        this.fileHandler = fileHandler;
     }
 
-    public List<Release> findAvailableReleases(final Path releaseDirectory, final Notifier notifier) throws LauncherException {
+    public void writeReleaseMeta(final Release release) throws IOException {
+        final String version = release.getVersion();
+        final Path outPath = dirResolver.getReleaseMeta(version).toPath();
+        try (final OutputStream out = fileHandler.getOutputStream(outPath)) {
+            decoder.write(out, release);
+        }
+    }
+
+    public List<Release> findAvailableReleases(final Notifier notifier) throws LauncherException {
         try {
-            return Files.walk(releaseDirectory, 1)
+            return Files.walk(dirResolver.getReleasesRoot(), 1)
                     .filter(this::isRelease)
                     .map(x -> loadRelease(x, notifier))
                     .filter(Objects::nonNull)
@@ -50,8 +64,8 @@ public class ReleaseDirectoryScanner {
         final File file = path.toFile();
 
         if (file.isDirectory()) {
-            boolean hasMeta = getReleaseFile(path, META_FILENAME).exists();
-            boolean hasBinary = getReleaseFile(path, RELEASE_FILENAME).exists();
+            boolean hasMeta = dirResolver.getReleaseMeta(file.getName()).exists();
+            boolean hasBinary = dirResolver.getReleaseBinary(file.getName()).exists();
             release = hasMeta && hasBinary;
         }
         return release;
@@ -59,7 +73,7 @@ public class ReleaseDirectoryScanner {
 
     private Release loadRelease(final Path releaseDirectory, final Notifier notifier) {
         Release loaded = null;
-        final File metaFile = getReleaseFile(releaseDirectory, META_FILENAME);
+        final File metaFile = dirResolver.getReleaseMeta(releaseDirectory.toFile().getName());
         try {
             loaded = decoder.read(metaFile, Release.class);
         }

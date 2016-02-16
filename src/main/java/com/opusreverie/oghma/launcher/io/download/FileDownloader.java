@@ -1,16 +1,19 @@
 package com.opusreverie.oghma.launcher.io.download;
 
 import com.opusreverie.oghma.launcher.domain.Content;
+import com.opusreverie.oghma.launcher.io.FileHandler;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import org.apache.commons.codec.digest.DigestUtils;
 import rx.Observable;
+import rx.Subscriber;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
@@ -25,10 +28,17 @@ import java.util.Objects;
  */
 public class FileDownloader {
 
-    private final Path oghmaRoot;
+    private final DirectoryResolver dirResolver;
+
+    private final FileHandler fileHandler;
 
     public FileDownloader(final Path oghmaRoot) {
-        this.oghmaRoot = oghmaRoot;
+        this(new DirectoryResolver(oghmaRoot), new FileHandler());
+    }
+
+    public FileDownloader(final DirectoryResolver dirResolver, final FileHandler fileHandler) {
+        this.dirResolver = dirResolver;
+        this.fileHandler = fileHandler;
     }
 
     public Observable<ProgressEvent> downloadFile(final Content file) {
@@ -37,29 +47,22 @@ public class FileDownloader {
                 long totalBytes = file.getSizeBytes();
                 final String url = file.getUrl();
 
-                final Path outPath = oghmaRoot.resolve(file.getPath());
-                if (!lengthEquals(totalBytes, outPath) || !hashEquals(file)) {
+                final Path outPath = dirResolver.getDownloadPath(file);
+                boolean installed = dirResolver.getInstalledPath(file).toFile().exists();
+                if (!installed && (lengthDiffers(totalBytes, outPath) || hashDiffers(file))) {
 
-                    Files.deleteIfExists(outPath);
-                    Files.createDirectories(outPath.getParent());
+                    fileHandler.deleteIfExists(outPath);
+                    fileHandler.createDirectories(outPath.getParent());
 
-                    final WebTarget target = ClientBuilder.newClient().target(url);
+                    final Client httpClient = ClientBuilder.newClient();
 
-                    try (final InputStream in = target.request().get(InputStream.class);
-                         final FileOutputStream fos = new FileOutputStream(outPath.toFile())) {
+                    try (final InputStream httpIn = retrieveHttpResponseStream(httpClient, url);
+                         final OutputStream fileOut = fileHandler.getOutputStream(outPath)) {
 
-                        int read;
-                        final byte[] buffer = new byte[4096];
-                        long downloadedBytes = 0;
-
-                        while ((read = in.read(buffer)) != -1) {
-                            downloadedBytes += read;
-                            if (downloadedBytes > totalBytes) {
-                                throw new IllegalStateException("Downloaded more bytes than expected");
-                            }
-                            fos.write(buffer, 0, read);
-                            subscriber.onNext(new ProgressEvent(downloadedBytes, totalBytes));
-                        }
+                        transferStreams(httpIn, fileOut, subscriber, totalBytes);
+                    }
+                    finally {
+                        httpClient.close();
                     }
 
                     // Hash check
@@ -74,8 +77,23 @@ public class FileDownloader {
         }).share();
     }
 
+    private void transferStreams(InputStream in, OutputStream out, Subscriber<? super ProgressEvent> subscriber, long totalExpectedBytes) throws IOException {
+        int read;
+        final byte[] buffer = new byte[4096];
+        long downloadedBytes = 0;
+
+        while ((read = in.read(buffer)) != -1) {
+            downloadedBytes += read;
+            if (downloadedBytes > totalExpectedBytes) {
+                throw new IllegalStateException("Downloaded more bytes than expected");
+            }
+            out.write(buffer, 0, read);
+            subscriber.onNext(new ProgressEvent(downloadedBytes, totalExpectedBytes));
+        }
+    }
+
     private void validateHash(final Content file) throws IOException, NoSuchAlgorithmException, IllegalStateException {
-        byte[] data = Files.readAllBytes(oghmaRoot.resolve(file.getPath()));
+        final byte[] data = fileHandler.readAllBytes(dirResolver.getDownloadPath(file));
         final String digest = DigestUtils.sha256Hex(data);
 
         if (!Objects.equals(digest, file.getSha256Hash())) {
@@ -84,19 +102,25 @@ public class FileDownloader {
         }
     }
 
-    private boolean hashEquals(final Content file) {
-        boolean equals = true;
+    private boolean hashDiffers(final Content file) {
+        boolean differs = false;
         try {
             validateHash(file);
         } catch (Exception e) {
-            equals = false;
+            differs = true;
         }
-        return equals;
+        return differs;
     }
 
-    private boolean lengthEquals(final long expected, final Path file) {
+    private boolean lengthDiffers(final long expected, final Path file) {
         long actual = file.toFile().length();
-        return expected == actual;
+        return expected != actual;
+    }
+
+    protected InputStream retrieveHttpResponseStream(final Client httpClient, final String url) throws IOException {
+        final WebTarget target = httpClient.target(url);
+
+        return target.request().get(InputStream.class);
     }
 
 }

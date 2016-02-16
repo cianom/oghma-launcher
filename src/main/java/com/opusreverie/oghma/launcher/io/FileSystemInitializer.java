@@ -5,6 +5,7 @@ import com.opusreverie.oghma.launcher.common.LauncherException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Arrays;
 
 /**
@@ -18,7 +19,8 @@ public class FileSystemInitializer {
 
     public void setUpFileSystemStructure(final Path oghmaAppData) throws LauncherException {
         safeCreateDir(oghmaAppData);
-
+        //TODO compute oghma root based on OS
+        //TODO extract these dir names
         Arrays.asList("release", "pack", "schema", "audio").stream()
                 .map(oghmaAppData::resolve)
                 .forEach(this::safeCreateDir);
@@ -29,7 +31,7 @@ public class FileSystemInitializer {
             if (!Files.exists(directory)) Files.createDirectory(directory);
         }
         catch (IOException e) {
-            throw new LauncherException(e);
+            throw new LauncherException(MessageFormat.format("Could not create directory [{0}]", directory), e);
         }
     }
 

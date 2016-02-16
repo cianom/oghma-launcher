@@ -1,8 +1,6 @@
 package com.opusreverie.oghma.launcher.io;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +37,18 @@ public class FileHandler {
 
     public InputStream getInputStream(final Path file) throws IOException {
         return new FileInputStream(file.toFile());
+    }
+
+    public boolean deleteIfExists(final Path path) throws IOException {
+        return Files.deleteIfExists(path);
+    }
+
+    public OutputStream getOutputStream(final Path file) throws IOException {
+        return new FileOutputStream(file.toFile());
+    }
+
+    public byte[] readAllBytes(final Path path) throws IOException {
+        return Files.readAllBytes(path);
     }
 
 }

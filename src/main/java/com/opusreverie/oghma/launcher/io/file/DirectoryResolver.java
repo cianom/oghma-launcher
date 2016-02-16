@@ -24,8 +24,18 @@ public class DirectoryResolver {
 
     private final Path oghmaRoot;
 
-    public DirectoryResolver(Path oghmaRoot) {
+    public DirectoryResolver(final Path oghmaRoot) {
         this.oghmaRoot = oghmaRoot;
+    }
+
+    public DirectoryResolver() {
+        Path userHome = Paths.get(System.getProperty("user.home"));
+        this.oghmaRoot = userHome.resolve(".oghma");
+        //TODO test validity under MAC/Windows
+    }
+
+    public boolean isInstalled(final Content file) {
+        return getInstalledPath(file).toFile().exists();
     }
 
     public Path getDownloadPath(final Content file) {

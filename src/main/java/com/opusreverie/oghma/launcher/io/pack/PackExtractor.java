@@ -37,8 +37,8 @@ public class PackExtractor {
         this.dirResolver = dirResolver;
     }
 
-    public PackExtractor(final Path oghmaRoot) {
-        this(new FileHandler(), new DirectoryResolver(oghmaRoot));
+    public PackExtractor(final DirectoryResolver dirResolver) {
+        this(new FileHandler(), dirResolver);
     }
 
     public Observable<ProgressEvent> extract(final Content packFile) {

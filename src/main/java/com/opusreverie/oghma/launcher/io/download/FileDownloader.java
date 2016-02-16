@@ -32,8 +32,8 @@ public class FileDownloader {
 
     private final FileHandler fileHandler;
 
-    public FileDownloader(final Path oghmaRoot) {
-        this(new DirectoryResolver(oghmaRoot), new FileHandler());
+    public FileDownloader(final DirectoryResolver dirResolver) {
+        this(dirResolver, new FileHandler());
     }
 
     public FileDownloader(final DirectoryResolver dirResolver, final FileHandler fileHandler) {
@@ -41,6 +41,12 @@ public class FileDownloader {
         this.fileHandler = fileHandler;
     }
 
+    /**
+     * Download a particular file and validate hash once complete.
+     *
+     * @param file the file to download.
+     * @return a stream of progress events.
+     */
     public Observable<ProgressEvent> downloadFile(final Content file) {
         return Observable.<ProgressEvent>create(subscriber -> {
             try {
@@ -48,8 +54,7 @@ public class FileDownloader {
                 final String url = file.getUrl();
 
                 final Path outPath = dirResolver.getDownloadPath(file);
-                boolean installed = dirResolver.getInstalledPath(file).toFile().exists();
-                if (!installed && (lengthDiffers(totalBytes, outPath) || hashDiffers(file))) {
+                if (lengthDiffers(totalBytes, outPath) || hashDiffers(file)) {
 
                     fileHandler.deleteIfExists(outPath);
                     fileHandler.createDirectories(outPath.getParent());
@@ -82,6 +87,7 @@ public class FileDownloader {
         final byte[] buffer = new byte[4096];
         long downloadedBytes = 0;
 
+        //TODO stop (and cleanup) if unsubscribed.
         while ((read = in.read(buffer)) != -1) {
             downloadedBytes += read;
             if (downloadedBytes > totalExpectedBytes) {

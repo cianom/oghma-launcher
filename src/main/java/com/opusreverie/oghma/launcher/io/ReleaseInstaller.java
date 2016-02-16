@@ -4,6 +4,7 @@ import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.io.download.FileDownloader;
 import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.pack.PackExtractor;
 import rx.Observable;
 import rx.Subscriber;
@@ -11,7 +12,6 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -30,23 +30,27 @@ public class ReleaseInstaller {
     private final FileDownloader fileDownloader;
     private final PackExtractor packExtractor;
     private final LocalReleaseRepository releaseRepository;
+    private final DirectoryResolver dirResolver;
     private final AtomicBoolean downloading = new AtomicBoolean(false);
 
-    public ReleaseInstaller(final Path oghmaRoot, final LocalReleaseRepository releaseRepository) {
-        this(new FileDownloader(oghmaRoot), new PackExtractor(oghmaRoot), releaseRepository);
+    public ReleaseInstaller(final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
+        this(new FileDownloader(dirResolver), new PackExtractor(dirResolver), releaseRepository, dirResolver);
     }
 
     public ReleaseInstaller(final FileDownloader fileDownloader, final PackExtractor packExtractor,
-                            final LocalReleaseRepository releaseRepository) {
+                            final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
         this.fileDownloader = fileDownloader;
         this.packExtractor = packExtractor;
         this.releaseRepository = releaseRepository;
+        this.dirResolver = dirResolver;
     }
 
     public Observable<ProgressEvent> install(final Release release) {
         boolean permitDownload = downloading.compareAndSet(false, true);
-        if (!permitDownload)
+
+        if (!permitDownload) {
             return Observable.error(new IllegalStateException("Download already running"));
+        }
 
         return Observable.<ProgressEvent>create(subscriber -> install(release, subscriber)).subscribeOn(Schedulers.io());
     }
@@ -55,22 +59,8 @@ public class ReleaseInstaller {
         // Binary
         final Download download = new Download(release);
 
-        for (final Content file : release.getBinaryAndContent()) {
-            if (!subscriber.isUnsubscribed()) {
-                final Action1<ProgressEvent> handler = prog -> subscriber
-                        .onNext(download.updateProgress(file, prog.getDownloadedBytes()).getProgress());
-
-                fileDownloader.downloadFile(file)
-                        .subscribeOn(Schedulers.io())
-                        .toBlocking()
-                        .subscribe(handler, subscriber::onError);
-
-                packExtractor.extract(file)
-                        .subscribeOn(Schedulers.io())
-                        .toBlocking()
-                        .subscribe(handler, subscriber::onError);
-            }
-        }
+        release.getBinaryAndContent()
+                .forEach(content -> installFile(subscriber, download, content));
 
         try {
             releaseRepository.writeReleaseMeta(release);
@@ -79,9 +69,26 @@ public class ReleaseInstaller {
             subscriber.onError(e);
         }
 
-
         subscriber.onCompleted();
         downloading.set(false);
+    }
+
+    private void installFile(Subscriber<? super ProgressEvent> subscriber, Download download, Content file)
+    {
+        if (!subscriber.isUnsubscribed()) {
+            final Action1<ProgressEvent> handler = prog -> subscriber
+                    .onNext(download.updateProgress(file, prog.getDownloadedBytes()).getProgress());
+
+            if (!dirResolver.isInstalled(file))
+            {
+                fileDownloader.downloadFile(file).subscribeOn(Schedulers.io()).toBlocking().subscribe(handler, subscriber::onError);
+
+                if (!subscriber.isUnsubscribed())
+                {
+                    packExtractor.extract(file).subscribeOn(Schedulers.io()).toBlocking().subscribe(__ -> {}, subscriber::onError);
+                }
+            }
+        }
     }
 
     public static class Download {

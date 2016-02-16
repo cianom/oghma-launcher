@@ -93,7 +93,7 @@ public class Controller implements Initializable {
         LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
-        installer = new ReleaseInstaller(oghmaAppData, releaseRepository);
+        installer = new ReleaseInstaller(releaseRepository, dirResolver);
         notifier = new Notifier(notificationBox);
 
         oghonDrawer.drawDefault();
@@ -152,6 +152,7 @@ public class Controller implements Initializable {
 
     private void cancelDownload(final AvailabilityRelease release) {
         if (release == null) return;
+        //TODO cancel installation
         Platform.runLater(() -> {
             notifier.notify("Cancelling download " + release, NotificationType.INFO);
             cancelDownloadButton.setVisible(false);

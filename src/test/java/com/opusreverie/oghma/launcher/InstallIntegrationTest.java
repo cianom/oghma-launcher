@@ -59,7 +59,7 @@ public class InstallIntegrationTest {
             }
         };
         PackExtractor extractor = new PackExtractor(mockFileHandler, dirResolver);
-        installer = new ReleaseInstaller(fileDownloader, extractor, releaseRepository);
+        installer = new ReleaseInstaller(fileDownloader, extractor, releaseRepository, dirResolver);
     }
 
     @Test

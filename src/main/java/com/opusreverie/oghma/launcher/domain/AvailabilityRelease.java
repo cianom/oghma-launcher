@@ -18,10 +18,16 @@ public class AvailabilityRelease {
         this.downloaded = downloaded;
     }
 
+    /**
+     * Creates a new downloaded release.
+     */
     public static AvailabilityRelease downloaded(final Release release) {
         return new AvailabilityRelease(release, true);
     }
 
+    /**
+     * Creates a new remotely available release.
+     */
     public static AvailabilityRelease available(final Release release) {
         return new AvailabilityRelease(release, false);
     }

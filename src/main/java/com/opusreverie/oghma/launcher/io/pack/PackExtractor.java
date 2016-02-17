@@ -96,11 +96,11 @@ public class PackExtractor {
     }
 
     protected boolean writeFileToDisk(final ExtractContent content) throws IOException {
-        if (!fileHandler.exists(content.destExtractPath)) {
+        boolean forCreation = !fileHandler.exists(content.destExtractPath);
+        if (forCreation) {
             fileHandler.write(content.destExtractPath, content.fileData);
-            return true;
         }
-        return false;
+        return forCreation;
     }
 
     private ExtractContent extractedContentFromInStream(final InputStream in, final Path extractPath) throws IOException {

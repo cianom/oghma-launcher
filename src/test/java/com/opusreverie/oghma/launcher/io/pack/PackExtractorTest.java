@@ -2,7 +2,7 @@ package com.opusreverie.oghma.launcher.io.pack;
 
 import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.helper.ReactiveResult;
-import com.opusreverie.oghma.launcher.io.FileHandler;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import org.junit.Before;
 import org.junit.Test;

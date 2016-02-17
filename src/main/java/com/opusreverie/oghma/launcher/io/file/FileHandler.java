@@ -1,4 +1,4 @@
-package com.opusreverie.oghma.launcher.io;
+package com.opusreverie.oghma.launcher.io.file;
 
 import java.io.*;
 import java.nio.file.CopyOption;

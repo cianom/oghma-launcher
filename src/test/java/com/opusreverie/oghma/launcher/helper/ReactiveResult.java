@@ -1,6 +1,5 @@
 package com.opusreverie.oghma.launcher.helper;
 
-import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
 import rx.Observable;
 
 import java.util.ArrayList;

@@ -84,8 +84,7 @@ public class DirectoryResolver {
 
     public Path getInstalledPath(final Content file) {
         final Path contentPath = Paths.get(file.getPath());
-        final String hash = file.getSha256Hash();
-        final String shortHash = hash.substring(0, Math.min(10, hash.length()));
+        final String shortHash = file.getSha256Hash().substring(0, Math.min(10, file.getSha256Hash().length()));
         final String installedFileName = shortHash + "_" + contentPath.getFileName();
         return getInstalledDir().resolve(installedFileName);
     }

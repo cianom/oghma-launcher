@@ -5,12 +5,12 @@ import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.helper.PackTestUtil;
 import com.opusreverie.oghma.launcher.helper.ReactiveResult;
 import com.opusreverie.oghma.launcher.helper.ReleaseTestUtil;
-import com.opusreverie.oghma.launcher.io.FileHandler;
+import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
 import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
 import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.download.FileDownloader;
-import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.pack.PackExtractor;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,12 +68,12 @@ public class InstallIntegrationTest {
         Release release = ReleaseTestUtil.createTestRelease(5);
 
         // When
-        ReactiveResult<ProgressEvent> r = ReactiveResult.of(installer.install(release));
+        ReactiveResult<InstallProgressEvent> r = ReactiveResult.of(installer.install(release));
 
         // Then
         if (!r.getErrors().isEmpty()) throw r.getErrors().get(0);
         Assert.assertTrue(r.getCompleted().get());
-        Assert.assertEquals(6, r.getEmitted().size());
+        Assert.assertEquals(6 + 72, r.getEmitted().size()); // 6 packs, each with 12 files inside the pack.
         Assert.assertEquals(0, r.getErrors().size());
     }
 

@@ -1,4 +1,4 @@
-package com.opusreverie.oghma.launcher.io;
+package com.opusreverie.oghma.launcher.io.file;
 
 import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;

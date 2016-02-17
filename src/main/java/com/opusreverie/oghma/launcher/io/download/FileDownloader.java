@@ -1,7 +1,7 @@
 package com.opusreverie.oghma.launcher.io.download;
 
 import com.opusreverie.oghma.launcher.domain.Content;
-import com.opusreverie.oghma.launcher.io.FileHandler;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import org.apache.commons.codec.digest.DigestUtils;
 import rx.Observable;
@@ -28,6 +28,8 @@ import java.util.Objects;
  */
 public class FileDownloader {
 
+    private static final int BUFFER_SIZE = 1024 * 16;
+
     private final DirectoryResolver dirResolver;
 
     private final FileHandler fileHandler;
@@ -47,8 +49,8 @@ public class FileDownloader {
      * @param file the file to download.
      * @return a stream of progress events.
      */
-    public Observable<ProgressEvent> downloadFile(final Content file) {
-        return Observable.<ProgressEvent>create(subscriber -> {
+    public Observable<DownloadProgressEvent> downloadFile(final Content file) {
+        return Observable.<DownloadProgressEvent>create(subscriber -> {
             try {
                 long totalBytes = file.getSizeBytes();
                 final String url = file.getUrl();
@@ -85,10 +87,10 @@ public class FileDownloader {
         }).share();
     }
 
-    private void transferStreams(final InputStream in, final OutputStream out, final Subscriber<? super ProgressEvent> subscriber,
+    private void transferStreams(final InputStream in, final OutputStream out, final Subscriber<? super DownloadProgressEvent> subscriber,
             final long totalExpectedBytes) throws IOException {
         int read;
-        final byte[] buffer = new byte[4096];
+        final byte[] buffer = new byte[BUFFER_SIZE];
         long downloadedBytes = 0;
         while ((read = in.read(buffer)) != -1 && !subscriber.isUnsubscribed()) {
             downloadedBytes += read;
@@ -96,7 +98,7 @@ public class FileDownloader {
                 throw new IllegalStateException("Downloaded more bytes than expected");
             }
             out.write(buffer, 0, read);
-            subscriber.onNext(new ProgressEvent(downloadedBytes, totalExpectedBytes));
+            subscriber.onNext(new DownloadProgressEvent(downloadedBytes));
         }
     }
 
@@ -130,5 +132,27 @@ public class FileDownloader {
 
         return target.request().get(InputStream.class);
     }
+
+    /**
+     * Event specifying progress information for a particular download.
+     * <p>
+     * Copyright © 2016 Cian O'Mahony. All rights reserved.
+     *
+     * @author Cian O'Mahony
+     */
+    public static class DownloadProgressEvent {
+
+        private final long downloadedBytes;
+
+        public DownloadProgressEvent(long downloadedBytes) {
+            this.downloadedBytes = downloadedBytes;
+        }
+
+        public long getDownloadedBytes() {
+            return downloadedBytes;
+        }
+
+    }
+
 
 }

@@ -1,10 +1,10 @@
 package com.opusreverie.oghma.launcher.io.pack;
 
 import com.opusreverie.oghma.launcher.domain.Content;
-import com.opusreverie.oghma.launcher.io.FileHandler;
-import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import rx.Observable;
+import rx.Subscriber;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,14 +41,14 @@ public class PackExtractor {
         this(new FileHandler(), dirResolver);
     }
 
-    public Observable<ProgressEvent> extract(final Content packFile) {
+    public Observable<ExtractEvent> extract(final Content packFile) {
         return Observable.create(subscriber -> {
             try {
                 final Path outPath = dirResolver.getDownloadPath(packFile);
 
                 final List<ExtractContent> extracted = extractInMemory(outPath);
 
-                writeFilesToDisk(extracted);
+                writeFilesToDisk(extracted, subscriber);
 
                 markInstalled(packFile);
 
@@ -79,11 +79,14 @@ public class PackExtractor {
         return content;
     }
 
-    private List<ExtractContent> writeFilesToDisk(final List<ExtractContent> content) throws IOException {
+    private List<ExtractContent> writeFilesToDisk(final List<ExtractContent> content,
+                                                  final Subscriber<? super ExtractEvent> subscriber) throws IOException {
         final List<ExtractContent> created = new ArrayList<>();
+        int extracted = 0;
         for (ExtractContent c : content) {
             try {
                 if (writeFileToDisk(c)) created.add(c);
+                subscriber.onNext(new ExtractEvent(++extracted, content.size()));
             } catch (IOException e) {
                 created.stream().map(x -> x.destExtractPath).forEach(fileHandler::delete);
                 throw e;
@@ -130,6 +133,26 @@ public class PackExtractor {
         public ExtractContent(Path destExtractPath, byte[] fileData) {
             this.destExtractPath = destExtractPath;
             this.fileData = fileData;
+        }
+    }
+
+    public static class ExtractEvent {
+
+        private final int extracted;
+        private final int totalToExtract;
+
+        public ExtractEvent(int extracted, int totalToExtract) {
+            this.extracted = extracted;
+            this.totalToExtract = totalToExtract;
+        }
+
+        public int getTotalToExtract() {
+            return totalToExtract;
+        }
+
+        public int getExtracted() {
+
+            return extracted;
         }
     }
 

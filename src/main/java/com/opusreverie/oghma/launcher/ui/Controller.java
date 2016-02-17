@@ -4,12 +4,10 @@ import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.Release;
-import com.opusreverie.oghma.launcher.io.FileHandler;
-import com.opusreverie.oghma.launcher.io.FileSystemInitializer;
-import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
-import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
-import com.opusreverie.oghma.launcher.io.download.ProgressEvent;
+import com.opusreverie.oghma.launcher.io.*;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
+import com.opusreverie.oghma.launcher.io.file.FileSystemInitializer;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
 import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
@@ -140,7 +138,7 @@ public class Controller implements Initializable {
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
 
-    private void updateProgress(final ProgressEvent prog) {
+    private void updateProgress(final InstallProgressEvent prog) {
         Platform.runLater(() -> cancelDownloadButton.setText(MessageFormat.format("cancel ({0})", prog.getFormattedPercentage())));
     }
 

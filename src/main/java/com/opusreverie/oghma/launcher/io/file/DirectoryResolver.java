@@ -7,6 +7,11 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Resolves directories and path for different content operations.
@@ -17,21 +22,52 @@ import java.text.MessageFormat;
  */
 public class DirectoryResolver {
 
-
     private static final String META_FILENAME = "oghma-{0}.json";
     private static final String RELEASE_FILENAME = "oghma-{0}.jar";
     private static final String INSTALLED_PACK_DIR = "pack/installed/";
 
     private final Path oghmaRoot;
 
-    public DirectoryResolver(final Path oghmaRoot) {
+    private DirectoryResolver(final Path oghmaRoot) {
         this.oghmaRoot = oghmaRoot;
     }
 
-    public DirectoryResolver() {
-        Path userHome = Paths.get(System.getProperty("user.home"));
-        this.oghmaRoot = userHome.resolve(".oghma");
-        //TODO test validity under MAC/Windows
+    public static DirectoryResolver ofRoot(final Path root) {
+        return new DirectoryResolver(root);
+    }
+
+    public static DirectoryResolver create() {
+        final String oghmaDirName = ".oghma";
+        final Path userHome = Paths.get(System.getProperty("user.home"));
+        final String os = System.getProperty("os.name");
+
+        Path oghmaRoot;
+        if (os.startsWith("Windows")) {
+            oghmaRoot = userHome.resolve("AppData/Roaming/").resolve(oghmaDirName);
+            if (!oghmaRoot.toFile().exists()) {
+                oghmaRoot = userHome.resolve(oghmaDirName);
+            }
+        }
+        else {
+            oghmaRoot = userHome.resolve(oghmaDirName);
+        }
+
+        return new DirectoryResolver(oghmaRoot);
+    }
+
+    public Path getRoot() {
+        return oghmaRoot;
+    }
+
+    public List<Path> getAllRequiredDirectories() {
+        final List<Path> allRequired = new ArrayList<>(Collections.singletonList(getRoot()));
+
+        EnumSet.allOf(ContentType.class).stream()
+                .map(ContentType::getContentPath)
+                .map(getRoot()::resolve)
+                .forEach(allRequired::add);
+
+        return allRequired;
     }
 
     public boolean isInstalled(final Content file) {
@@ -39,11 +75,11 @@ public class DirectoryResolver {
     }
 
     public Path getDownloadPath(final Content file) {
-        return oghmaRoot.resolve(file.getPath());
+        return getRoot().resolve(file.getPath());
     }
 
     public Path getInstalledDir() {
-        return oghmaRoot.resolve(INSTALLED_PACK_DIR);
+        return getRoot().resolve(INSTALLED_PACK_DIR);
     }
 
     public Path getInstalledPath(final Content file) {
@@ -56,7 +92,7 @@ public class DirectoryResolver {
 
     public Path computeExtractPath(final String fileName) {
         return ContentType.fromFilePath(fileName)
-                .map(type -> oghmaRoot.resolve(type.getContentPath()))
+                .map(type -> getRoot().resolve(type.getContentPath()))
                 .orElse(null);
     }
 
@@ -71,7 +107,7 @@ public class DirectoryResolver {
     }
 
     public Path getReleasesRoot() {
-        return oghmaRoot.resolve("release/");
+        return getRoot().resolve("release/");
     }
 
 

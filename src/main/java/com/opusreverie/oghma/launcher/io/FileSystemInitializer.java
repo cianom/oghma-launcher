@@ -1,12 +1,12 @@
 package com.opusreverie.oghma.launcher.io;
 
 import com.opusreverie.oghma.launcher.common.LauncherException;
+import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 /**
  * Ensures existence of directory structure required to download and install content.
@@ -17,18 +17,20 @@ import java.util.Arrays;
  */
 public class FileSystemInitializer {
 
-    public void setUpFileSystemStructure(final Path oghmaAppData) throws LauncherException {
-        safeCreateDir(oghmaAppData);
-        //TODO compute oghma root based on OS
-        //TODO extract these dir names
-        Arrays.asList("release", "pack", "schema", "audio").stream()
-                .map(oghmaAppData::resolve)
-                .forEach(this::safeCreateDir);
+    private DirectoryResolver dirResolver;
+
+    public FileSystemInitializer(DirectoryResolver dirResolver)
+    {
+        this.dirResolver = dirResolver;
+    }
+
+    public void setUpFileSystemStructure() throws LauncherException {
+        dirResolver.getAllRequiredDirectories().forEach(this::safeCreateDir);
     }
 
     private void safeCreateDir(final Path directory) throws LauncherException {
         try {
-            if (!Files.exists(directory)) Files.createDirectory(directory);
+            if (!Files.exists(directory)) Files.createDirectories(directory);
         }
         catch (IOException e) {
             throw new LauncherException(MessageFormat.format("Could not create directory [{0}]", directory), e);

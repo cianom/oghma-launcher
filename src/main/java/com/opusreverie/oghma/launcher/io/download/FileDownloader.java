@@ -77,18 +77,20 @@ public class FileDownloader {
             } catch (IOException | ProcessingException | NoSuchAlgorithmException | IllegalStateException ex) {
                 subscriber.onError(ex);
             }
+
+            //TODO consider cleaning up file is unsubscribed.
+
             subscriber.onCompleted();
 
         }).share();
     }
 
-    private void transferStreams(InputStream in, OutputStream out, Subscriber<? super ProgressEvent> subscriber, long totalExpectedBytes) throws IOException {
+    private void transferStreams(final InputStream in, final OutputStream out, final Subscriber<? super ProgressEvent> subscriber,
+            final long totalExpectedBytes) throws IOException {
         int read;
         final byte[] buffer = new byte[4096];
         long downloadedBytes = 0;
-
-        //TODO stop (and cleanup) if unsubscribed.
-        while ((read = in.read(buffer)) != -1) {
+        while ((read = in.read(buffer)) != -1 && !subscriber.isUnsubscribed()) {
             downloadedBytes += read;
             if (downloadedBytes > totalExpectedBytes) {
                 throw new IllegalStateException("Downloaded more bytes than expected");

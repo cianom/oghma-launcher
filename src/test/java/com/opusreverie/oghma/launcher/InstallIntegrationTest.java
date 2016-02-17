@@ -50,7 +50,7 @@ public class InstallIntegrationTest {
         Mockito.when(mockFileHandler.getOutputStream(any(Path.class))).then(__ -> new ByteArrayOutputStream());
 
         // Objects
-        DirectoryResolver dirResolver = new DirectoryResolver(OGHMA_ROOT);
+        DirectoryResolver dirResolver = DirectoryResolver.ofRoot(OGHMA_ROOT);
         LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, mockFileHandler);
         FileDownloader fileDownloader = new FileDownloader(dirResolver, mockFileHandler) {
             @Override

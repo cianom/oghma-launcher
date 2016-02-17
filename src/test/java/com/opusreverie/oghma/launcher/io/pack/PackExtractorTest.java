@@ -39,7 +39,7 @@ public class PackExtractorTest {
 
     @Before
     public void setUp() throws Exception {
-        classUnderTest = new PackExtractor(mockFileHandler, new DirectoryResolver(Paths.get("/pack")));
+        classUnderTest = new PackExtractor(mockFileHandler, DirectoryResolver.ofRoot(Paths.get("/pack")));
 
         when(mockFileHandler.exists(any(Path.class))).thenReturn(true, false);
     }

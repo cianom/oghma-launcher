@@ -29,10 +29,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import rx.Subscription;
 
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -83,13 +82,14 @@ public class Controller implements Initializable {
 
     private OghonDrawer oghonDrawer;
 
+    private transient Subscription activeInstallation;
+
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        final Path oghmaAppData = Paths.get(System.getProperty("user.home"), ".oghma");
         final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/backend");
 
-        DirectoryResolver dirResolver = new DirectoryResolver(oghmaAppData);
+        DirectoryResolver dirResolver = DirectoryResolver.create();
         LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
@@ -109,7 +109,7 @@ public class Controller implements Initializable {
         cancelDownloadButton.setOnAction(evt -> cancelDownload(versions.getSelectionModel().getSelectedItem()));
 
         try {
-            new FileSystemInitializer().setUpFileSystemStructure(oghmaAppData);
+            new FileSystemInitializer(dirResolver).setUpFileSystemStructure();
             Collection<Release> downloaded = releaseRepository.findAvailableReleases(notifier);
             setSelectableReleases(downloaded, Collections.emptyList());
         } catch (final LauncherException e) {
@@ -129,20 +129,14 @@ public class Controller implements Initializable {
         oghonDrawer.drawPico(pico);
 
         // Play/Download
-        playButton.setVisible(release.isDownloaded());
-        downloadButton.setVisible(!release.isDownloaded());
-        cancelDownloadButton.setVisible(false);
+        setUIDownloadState(false, !release.isDownloaded(), release.isDownloaded(), false);
     }
 
     private void startDownload(final AvailabilityRelease release) {
         if (release == null) return;
-        Platform.runLater(() -> {
-            notifier.notify("Starting download " + release, NotificationType.INFO);
-            cancelDownloadButton.setVisible(true);
-            downloadButton.setVisible(false);
-            versions.setDisable(true);
-        });
-        installer.install(release.getRelease())
+        Platform.runLater(() -> notifier.notify("Starting download " + release, NotificationType.INFO));
+        setUIDownloadState(true, false, false, true);
+        activeInstallation = installer.install(release.getRelease())
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
 
@@ -152,33 +146,20 @@ public class Controller implements Initializable {
 
     private void cancelDownload(final AvailabilityRelease release) {
         if (release == null) return;
-        //TODO cancel installation
-        Platform.runLater(() -> {
-            notifier.notify("Cancelling download " + release, NotificationType.INFO);
-            cancelDownloadButton.setVisible(false);
-            downloadButton.setVisible(true);
-            versions.setDisable(false);
-        });
+        Optional.ofNullable(activeInstallation).ifPresent(Subscription::unsubscribe);
+        Platform.runLater(() -> notifier.notify("Cancelling download " + release, NotificationType.INFO));
+        setUIDownloadState(false, true, false, false);
     }
 
     private void downloadCompleted(final AvailabilityRelease release) {
         release.setDownloaded(true);
-        Platform.runLater(() -> {
-            notifier.notify("Download completed " + release, NotificationType.INFO);
-            cancelDownloadButton.setVisible(false);
-            downloadButton.setVisible(false);
-            playButton.setVisible(true);
-            versions.setDisable(false);
-        });
+        Platform.runLater(() -> notifier.notify("Download completed " + release, NotificationType.INFO));
+        setUIDownloadState(false, false, true, false);
     }
 
     private void downloadFailed(final AvailabilityRelease release, final Throwable ex) {
-        Platform.runLater(() -> {
-            notifier.notify(MessageFormat.format("Download failed for {0} - reason: {2}", release, ex.getMessage()), NotificationType.ERROR);
-            cancelDownloadButton.setVisible(false);
-            downloadButton.setVisible(true);
-            versions.setDisable(false);
-        });
+        Platform.runLater(() -> notifier.notify(MessageFormat.format("Download failed for {0} - reason: {2}", release, ex.getMessage()), NotificationType.ERROR));
+        setUIDownloadState(false, true, false, false);
     }
 
     private void setDownloadedReleases(final Collection<Release> downloaded) {
@@ -190,6 +171,16 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             updateConnectivity(true);
             setSelectableReleases(downloaded, available);
+        });
+    }
+
+    private void setUIDownloadState(boolean cancelVisible, boolean downloadVisible, boolean playVisible, boolean versionsDisabled)
+    {
+        Platform.runLater(() -> {
+            cancelDownloadButton.setVisible(cancelVisible);
+            downloadButton.setVisible(downloadVisible);
+            playButton.setVisible(playVisible);
+            versions.setDisable(versionsDisabled);
         });
     }
 

@@ -13,7 +13,7 @@ import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -31,7 +31,7 @@ public class ReleaseInstaller {
     private final PackExtractor packExtractor;
     private final LocalReleaseRepository releaseRepository;
     private final DirectoryResolver dirResolver;
-    private final AtomicBoolean downloading = new AtomicBoolean(false);
+    private final ConcurrentHashMap<Release, Observable<ProgressEvent>> fileLocks = new ConcurrentHashMap<>();
 
     public ReleaseInstaller(final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
         this(new FileDownloader(dirResolver), new PackExtractor(dirResolver), releaseRepository, dirResolver);
@@ -46,31 +46,36 @@ public class ReleaseInstaller {
     }
 
     public Observable<ProgressEvent> install(final Release release) {
-        boolean permitDownload = downloading.compareAndSet(false, true);
 
-        if (!permitDownload) {
+        final Observable<ProgressEvent> stream = Observable.<ProgressEvent>create(subscriber -> install(release, subscriber)).subscribeOn(Schedulers.io());
+
+        if (lock(release, stream)) {
+            return stream;
+        }
+        else {
             return Observable.error(new IllegalStateException("Download already running"));
         }
-
-        return Observable.<ProgressEvent>create(subscriber -> install(release, subscriber)).subscribeOn(Schedulers.io());
     }
 
     private void install(final Release release, final Subscriber<? super ProgressEvent> subscriber) {
         // Binary
-        final Download download = new Download(release);
-
-        release.getBinaryAndContent()
-                .forEach(content -> installFile(subscriber, download, content));
-
         try {
-            releaseRepository.writeReleaseMeta(release);
-        }
-        catch (IOException e) {
-            subscriber.onError(e);
-        }
+            final Download download = new Download(release);
 
-        subscriber.onCompleted();
-        downloading.set(false);
+            release.getBinaryAndContent().forEach(content -> installFile(subscriber, download, content));
+
+            try {
+                releaseRepository.writeReleaseMeta(release);
+            }
+            catch (IOException e) {
+                subscriber.onError(e);
+            }
+
+            subscriber.onCompleted();
+        }
+        finally {
+            unlock(release);
+        }
     }
 
     private void installFile(Subscriber<? super ProgressEvent> subscriber, Download download, Content file)
@@ -89,6 +94,16 @@ public class ReleaseInstaller {
                 }
             }
         }
+    }
+
+    private boolean lock(Release release, Observable<ProgressEvent> stream)
+    {
+        return fileLocks.putIfAbsent(release, stream) == null;
+    }
+
+    private void unlock(Release release)
+    {
+        fileLocks.remove(release);
     }
 
     public static class Download {

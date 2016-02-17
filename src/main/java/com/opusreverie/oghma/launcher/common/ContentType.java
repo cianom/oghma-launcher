@@ -24,7 +24,7 @@ public enum ContentType {
     EFFECT("ae", "audio/effect"),
     UI("gu", "graphic/ui"),
     GAME("gg", "graphic/game"),
-    SHADER("gs", "graphic/shaders");
+    SHADER("gs", "graphic/shader");
 
 
     private final String extension;

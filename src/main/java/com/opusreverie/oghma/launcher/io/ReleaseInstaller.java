@@ -1,5 +1,6 @@
 package com.opusreverie.oghma.launcher.io;
 
+import com.opusreverie.oghma.launcher.common.ContentType;
 import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.io.download.FileDownloader;
@@ -83,21 +84,26 @@ public class ReleaseInstaller {
             final Action1<DownloadProgressEvent> handler = prog -> subscriber
                     .onNext(install.updateDownloadProgress(file, prog.getDownloadedBytes()).getProgress());
 
-            if (!dirResolver.isInstalled(file)) {
-                fileDownloader.downloadFile(file)
+            fileDownloader.downloadFile(file)
+                    .subscribeOn(Schedulers.io())
+                    .toBlocking()
+                    .subscribe(handler, subscriber::onError);
+
+            if (isExtractable(file, subscriber)) {
+
+                packExtractor.extract(file)
                         .subscribeOn(Schedulers.io())
                         .toBlocking()
-                        .subscribe(handler, subscriber::onError);
-
-                if (!subscriber.isUnsubscribed()) {
-                    packExtractor.extract(file)
-                            .subscribeOn(Schedulers.io())
-                            .toBlocking()
-                            .subscribe(s -> subscriber.onNext(install.updateExtractProgress(file).getProgress()),
-                                    subscriber::onError);
-                }
+                        .subscribe(s -> subscriber.onNext(install.updateExtractProgress(file).getProgress()),
+                                subscriber::onError);
             }
         }
+    }
+
+    private boolean isExtractable(final Content file, final Subscriber<?> subscriber) {
+        return !dirResolver.isInstalled(file)
+                && !subscriber.isUnsubscribed()
+                && ContentType.isPack(file.getPath());
     }
 
     private boolean lock(Release release, Observable<InstallProgressEvent> stream) {

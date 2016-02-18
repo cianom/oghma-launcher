@@ -3,6 +3,8 @@ package com.opusreverie.oghma.launcher.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 /**
  * Information about a remote file that's available for download.
  * <p>
@@ -49,4 +51,18 @@ public class Content {
         return sha256Hash;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Content content = (Content) o;
+        return sizeBytes == content.sizeBytes &&
+                Objects.equals(path, content.path) &&
+                Objects.equals(sha256Hash, content.sha256Hash);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, sizeBytes, sha256Hash);
+    }
 }

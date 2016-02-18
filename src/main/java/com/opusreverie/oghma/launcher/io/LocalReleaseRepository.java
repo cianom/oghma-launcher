@@ -41,6 +41,10 @@ public class LocalReleaseRepository {
 
     public void writeReleaseMeta(final Release release) throws IOException {
         final String version = release.getVersion();
+
+        final Path releaseDir = dirResolver.getReleaseDir(version);
+        fileHandler.createDirectories(releaseDir);
+
         final Path outPath = dirResolver.getReleaseMeta(version).toPath();
         try (final OutputStream out = fileHandler.getOutputStream(outPath)) {
             decoder.write(out, release);

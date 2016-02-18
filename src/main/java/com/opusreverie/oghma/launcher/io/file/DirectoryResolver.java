@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Resolves directories and path for different content operations.
@@ -67,6 +66,9 @@ public class DirectoryResolver {
                 .map(getRoot()::resolve)
                 .forEach(allRequired::add);
 
+        allRequired.add(getInstalledDir());
+        allRequired.add(getReleasesRoot());
+
         return allRequired;
     }
 
@@ -95,14 +97,18 @@ public class DirectoryResolver {
                 .orElse(null);
     }
 
+    public Path getReleaseDir(final String version) {
+        return getReleasesRoot().resolve(version);
+    }
+
     public File getReleaseMeta(final String version) {
         final String metaName = MessageFormat.format(META_FILENAME, version);
-        return getReleasesRoot().resolve(version).resolve(metaName).toFile();
+        return getReleaseDir(version).resolve(metaName).toFile();
     }
 
     public File getReleaseBinary(final String version) {
         final String metaName = MessageFormat.format(RELEASE_FILENAME, version);
-        return getReleasesRoot().resolve(version).resolve(metaName).toFile();
+        return getReleaseDir(version).resolve(metaName).toFile();
     }
 
     public Path getReleasesRoot() {

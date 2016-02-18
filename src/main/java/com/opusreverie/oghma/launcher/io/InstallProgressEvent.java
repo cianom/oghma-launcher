@@ -20,7 +20,7 @@ public class InstallProgressEvent {
     }
 
     public double getPercentage() {
-        return (downloadPercent * 0.9) / (extractPercent * 0.1);
+        return (downloadPercent * 0.9) + (extractPercent * 0.1);
     }
 
     public String getFormattedPercentage() {

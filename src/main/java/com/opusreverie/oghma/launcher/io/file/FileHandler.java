@@ -31,6 +31,10 @@ public class FileHandler {
         return Files.move(source, target, options);
     }
 
+    public Path createFile(final Path path, FileAttribute<?>... attrs) throws IOException {
+        return Files.createFile(path, attrs);
+    }
+
     public Path createDirectories(final Path dir, final FileAttribute<?>... attrs) throws IOException {
         return Files.createDirectories(dir, attrs);
     }

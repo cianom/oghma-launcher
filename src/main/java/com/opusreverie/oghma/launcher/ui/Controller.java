@@ -4,7 +4,9 @@ import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.Release;
-import com.opusreverie.oghma.launcher.io.*;
+import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
+import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
+import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.FileSystemInitializer;
@@ -29,6 +31,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import rx.Subscription;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
@@ -82,12 +86,14 @@ public class Controller implements Initializable {
 
     private transient Subscription activeInstallation;
 
+    private DirectoryResolver dirResolver;
+
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/backend");
 
-        DirectoryResolver dirResolver = DirectoryResolver.create();
+        dirResolver = DirectoryResolver.create();
         LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
@@ -101,6 +107,7 @@ public class Controller implements Initializable {
         Tooltip.install(newIcon, tt);
 
         playButton.managedProperty().bind(playButton.visibleProperty());
+        playButton.setOnAction(evt -> playVersion(versions.getSelectionModel().getSelectedItem()));
         downloadButton.managedProperty().bind(downloadButton.visibleProperty());
         downloadButton.setOnAction(evt -> startDownload(versions.getSelectionModel().getSelectedItem()));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
@@ -109,7 +116,8 @@ public class Controller implements Initializable {
         try {
             new FileSystemInitializer(dirResolver).setUpFileSystemStructure();
             Collection<Release> downloaded = releaseRepository.findAvailableReleases(notifier);
-            setSelectableReleases(downloaded, Collections.emptyList());
+            setDownloadedReleases(downloaded);
+            setSelectableReleases(Collections.emptyList());
         } catch (final LauncherException e) {
             notifier.notify(e.toString(), NotificationType.ERROR);
         }
@@ -130,6 +138,20 @@ public class Controller implements Initializable {
         setUIDownloadState(false, !release.isDownloaded(), release.isDownloaded(), false);
     }
 
+    private void playVersion(final AvailabilityRelease release) {
+        if (!release.isDownloaded()) notifier.notify("Release not available to play", NotificationType.ERROR);
+
+        final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getVersion());
+        try {
+            new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
+            System.exit(0);
+        }
+        catch (IOException e) {
+            final String errorMsg = MessageFormat.format("Could not start version. Reason: [{0}]", e.getMessage());
+            notifier.notify(errorMsg, NotificationType.ERROR);
+        }
+
+    }
     private void startDownload(final AvailabilityRelease release) {
         if (release == null) return;
         Platform.runLater(() -> notifier.notify("Starting download " + release, NotificationType.INFO));
@@ -156,7 +178,7 @@ public class Controller implements Initializable {
     }
 
     private void downloadFailed(final AvailabilityRelease release, final Throwable ex) {
-        Platform.runLater(() -> notifier.notify(MessageFormat.format("Download failed for {0} - reason: {2}", release, ex.getMessage()), NotificationType.ERROR));
+        Platform.runLater(() -> notifier.notify(MessageFormat.format("Download failed for {0} - reason: {1}", release, ex.getMessage()), NotificationType.ERROR));
         setUIDownloadState(false, true, false, false);
     }
 
@@ -168,7 +190,7 @@ public class Controller implements Initializable {
     private void setAvailableReleases(final Collection<Release> available) {
         Platform.runLater(() -> {
             updateConnectivity(true);
-            setSelectableReleases(downloaded, available);
+            setSelectableReleases(available);
         });
     }
 
@@ -185,8 +207,7 @@ public class Controller implements Initializable {
     /**
      * Merges downloaded and available lists.
      */
-    private Set<AvailabilityRelease> setSelectableReleases(final Collection<Release> downloaded, final Collection<Release> available) {
-        setDownloadedReleases(downloaded);
+    private Set<AvailabilityRelease> setSelectableReleases(final Collection<Release> available) {
 
         // Merge
         final Set<AvailabilityRelease> selectable = new LinkedHashSet<>();

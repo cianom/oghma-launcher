@@ -24,7 +24,8 @@ public enum ContentType {
     EFFECT("ae", "audio/effect"),
     UI("gu", "graphic/ui"),
     GAME("gg", "graphic/game"),
-    SHADER("gs", "graphic/shader");
+    SHADER("gs", "graphic/shader"),
+    PACK("op", "pack/");
 
 
     private final String extension;
@@ -44,6 +45,10 @@ public enum ContentType {
                     .findFirst();
         }
         return Optional.empty();
+    }
+
+    public static boolean isPack(final String fileName) {
+        return fromFilePath(fileName).orElse(null) == ContentType.PACK;
     }
 
     public String getExtension() {

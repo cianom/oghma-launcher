@@ -1,8 +1,8 @@
 package com.opusreverie.oghma.launcher.io.pack;
 
 import com.opusreverie.oghma.launcher.domain.Content;
-import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
+import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -117,9 +117,8 @@ public class PackExtractor {
     }
 
     private void markInstalled(final Content packFile) throws IOException {
-        final Path source = dirResolver.getDownloadPath(packFile);
         final Path target = dirResolver.getInstalledPath(packFile);
-        fileHandler.move(source, target);
+        fileHandler.createFile(target);
     }
 
     private void ensureDirectoryStructure(final Path extractPath) throws IOException {

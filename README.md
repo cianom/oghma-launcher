@@ -5,4 +5,4 @@
 - [ ] multi-controller?
 - [ ] third party repos
 - [ ] release version no longer supported warning
-- [ ] launcher out of date warning
+- [x] launcher out of date warning

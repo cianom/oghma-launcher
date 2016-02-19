@@ -259,10 +259,11 @@ public class Controller implements Initializable {
     }
 
     private void updateConnectivity(boolean connectivity) {
-        Tooltip tt = new Tooltip(connectivity ? "has connectivity" : "no connectivity to download new versions");
+        final Tooltip tt = new Tooltip(connectivity ? "has connectivity" : "no connectivity to download new versions");
         Tooltip.install(connectivityIcon, tt);
         final String iconPath = MessageFormat.format("/icon/{0}connectivity.png", connectivity ? "" : "no_");
         connectivityIcon.setImage(new Image(this.getClass().getResourceAsStream(iconPath)));
+        connectivityIcon.setVisible(true);
     }
 
     private void setComboStyle() {

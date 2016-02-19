@@ -3,6 +3,7 @@ package com.opusreverie.oghma.launcher.ui;
 import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
+import com.opusreverie.oghma.launcher.domain.LauncherVersion;
 import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
 import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
@@ -10,6 +11,7 @@ import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.file.FileSystemInitializer;
+import com.opusreverie.oghma.launcher.io.http.LauncherVersionService;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
 import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
@@ -45,6 +47,8 @@ import java.util.*;
  * @author Cian O'Mahony
  */
 public class Controller implements Initializable {
+
+    private static final String VERSION = "1.0.0";
 
     @FXML
     Canvas picoCanvas;
@@ -124,6 +128,7 @@ public class Controller implements Initializable {
 
         updateConnectivity(false);
         new ReleaseService(serviceUri).getReleasesWithRetry().thenAccept(this::setAvailableReleases);
+        new LauncherVersionService(serviceUri).getLatestVersionWithRetry().thenAccept(this::setLauncherVersionStatus);
 
         versions.setOnAction(evt -> selectRelease(versions.getSelectionModel().getSelectedItem()));
     }
@@ -185,6 +190,15 @@ public class Controller implements Initializable {
     private void setDownloadedReleases(final Collection<Release> downloaded) {
         this.downloaded.clear();
         this.downloaded.addAll(downloaded);
+    }
+
+    private void setLauncherVersionStatus(final LauncherVersion version) {
+        if (!VERSION.equalsIgnoreCase(version.getVersion())) {
+            Platform.runLater(() -> {
+                versionLabel.setVisible(true);
+                versionLabel.setText("New launcher available from www.oghma.io");
+            });
+        }
     }
 
     private void setAvailableReleases(final Collection<Release> available) {

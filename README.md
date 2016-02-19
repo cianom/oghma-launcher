@@ -6,3 +6,4 @@
 - [ ] third party repos
 - [ ] release version no longer supported warning
 - [x] launcher out of date warning
+- [ ] latest release version

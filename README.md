@@ -6,4 +6,5 @@
 - [ ] third party repos
 - [ ] release version no longer supported warning
 - [x] launcher out of date warning
-- [ ] latest release version
+- [x] latest release version
+- [x] last selected release persistent preference

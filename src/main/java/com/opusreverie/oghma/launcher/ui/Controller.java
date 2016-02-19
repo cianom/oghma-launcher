@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.prefs.Preferences;
 
 /**
  * UI controller that coordinates between UI components and services layer.
@@ -49,6 +50,7 @@ import java.util.*;
 public class Controller implements Initializable {
 
     private static final String VERSION = "1.0.0";
+    private static final String OGHMA_SELECTED_RELEASE = "oghma.selected.release";
 
     @FXML
     Canvas picoCanvas;
@@ -149,6 +151,7 @@ public class Controller implements Initializable {
         final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getVersion());
         try {
             new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
+            preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
             System.exit(0);
         }
         catch (IOException e) {
@@ -161,6 +164,7 @@ public class Controller implements Initializable {
         if (release == null) return;
         Platform.runLater(() -> notifier.notify("Starting download " + release, NotificationType.INFO));
         setUIDownloadState(true, false, false, true);
+        preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
         activeInstallation = installer.install(release.getRelease())
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
@@ -226,7 +230,10 @@ public class Controller implements Initializable {
         // Merge
         final Set<AvailabilityRelease> selectable = new LinkedHashSet<>();
 
-        downloaded.stream().map(AvailabilityRelease::downloaded).forEach(selectable::add);
+        downloaded.stream()
+                .filter(d -> available.stream().noneMatch(d::isSnapshotUpdate))
+                .map(AvailabilityRelease::downloaded)
+                .forEach(selectable::add);
 
         available.stream()
                 .filter(a -> !downloaded.contains(a))
@@ -235,10 +242,20 @@ public class Controller implements Initializable {
 
         Platform.runLater(() -> {
             versions.setItems(FXCollections.observableArrayList(selectable));
-            if (!selectable.isEmpty()) versions.getSelectionModel().select(0);
+            selectReleasePreference();
         });
 
         return selectable;
+    }
+
+    private void selectReleasePreference() {
+        if (!versions.getItems().isEmpty()) {
+            final String preferredVersion = preferences().get(OGHMA_SELECTED_RELEASE, null);
+            final AvailabilityRelease toSelect = versions.getItems().stream()
+                    .filter(ar -> Objects.equals(preferredVersion, ar.getRelease().getVersion()))
+                    .findFirst().orElse(versions.getItems().get(0));
+            versions.getSelectionModel().select(toSelect);
+        }
     }
 
     private void updateConnectivity(boolean connectivity) {
@@ -250,6 +267,10 @@ public class Controller implements Initializable {
 
     private void setComboStyle() {
         versions.setButtonCell(new CssListCell<>("#FFFFFF"));
+    }
+
+    private Preferences preferences() {
+        return Preferences.userRoot().node(this.getClass().getName());
     }
 
 }

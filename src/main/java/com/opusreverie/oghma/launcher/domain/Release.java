@@ -75,6 +75,14 @@ public class Release {
         return all;
     }
 
+    public boolean isSnapshotUpdate(final Release other) {
+        return isSameVersion(other) && !equals(other);
+    }
+
+    public boolean isSameVersion(final Release other) {
+        return getVersion().equalsIgnoreCase(other.getVersion());
+    }
+
     public Content getBinary() {
         return binary;
     }
@@ -97,11 +105,12 @@ public class Release {
                 Objects.equals(name, release.name) &&
                 Objects.equals(releasedOn, release.releasedOn) &&
                 Objects.equals(oghon, release.oghon) &&
-                Objects.equals(binary, release.binary);
+                Objects.equals(binary, release.binary) &&
+                Objects.equals(content, release.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(version, name, releasedOn, oghon, binary);
+        return Objects.hash(version, name, releasedOn, oghon, binary, content);
     }
 }

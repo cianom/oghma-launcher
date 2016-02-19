@@ -27,7 +27,7 @@ public class PackTestUtil {
 
     public static void createPackToOutStream(final OutputStream out) {
         try (final ZipOutputStream zout = new ZipOutputStream(out)) {
-            for (ContentType contentType : ContentType.values()) {
+            for (ContentType contentType : ContentType.packTypes()) {
                 final ZipEntry entry = new ZipEntry("test." + contentType.getExtension() + "1");
                 zout.putNextEntry(entry);
                 zout.write(new byte[]{1, 2});

@@ -73,7 +73,7 @@ public class InstallIntegrationTest {
         // Then
         if (!r.getErrors().isEmpty()) throw r.getErrors().get(0);
         Assert.assertTrue(r.getCompleted().get());
-        Assert.assertEquals(6 + 72, r.getEmitted().size()); // 6 packs, each with 12 files inside the pack.
+        Assert.assertEquals(6 + (5 * 12), r.getEmitted().size()); // 1 binary and 5 packs (each with 12 files inside the pack)
         Assert.assertEquals(0, r.getErrors().size());
     }
 

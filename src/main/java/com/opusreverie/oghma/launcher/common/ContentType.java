@@ -51,6 +51,10 @@ public enum ContentType {
         return fromFilePath(fileName).orElse(null) == ContentType.PACK;
     }
 
+    public static EnumSet<ContentType> packTypes() {
+        return EnumSet.of(FORM, MATERIAL, CLIMATE, ITEM, FLORA, GRASS, MUSIC, ENVIRONMENT, EFFECT, UI, GAME, SHADER);
+    }
+
     public String getExtension() {
         return extension;
     }

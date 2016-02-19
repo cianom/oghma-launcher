@@ -58,7 +58,7 @@ public class PackExtractorTest {
         assertTrue(r.getCompleted().get());
         assertTrue(r.getErrors().isEmpty());
         verify(mockFileHandler, times(2)).write(any(Path.class), any(byte[].class));
-        verify(mockFileHandler).move(any(Path.class), any(Path.class));
+        verify(mockFileHandler).createFile((any(Path.class)));
     }
 
     @Test

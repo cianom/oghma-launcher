@@ -18,13 +18,17 @@ public class ReleaseTestUtil {
 
     public static Release createTestRelease(int contentFileCount) {
         final List<Content> contents = IntStream.range(1, 1 + contentFileCount)
-                .mapToObj(ReleaseTestUtil::createTestContent)
+                .mapToObj(ReleaseTestUtil::createTestPack)
                 .collect(Collectors.toList());
         return new Release("1.0.0", "One", Calendar.getInstance().getTime(), "na", createTestContent(0), contents);
     }
 
     public static Content createTestContent(int index) {
         return new Content("http://" + index, "path/" + index, 1366, HASH);
+    }
+
+    public static Content createTestPack(int index) {
+        return new Content("http://" + index, "path/" + index + ".op1", 1366, HASH);
     }
 
 }

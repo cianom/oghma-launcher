@@ -51,6 +51,19 @@ public class ReleaseListBuilderTest {
     }
 
     @Test
+    public void merge_MultipleStable_LatestChosenCorrectly() throws Exception {
+        final List<Release> available = createReleases(1, 2, 0);
+        final Release latestAvailable = available.get(available.size() - 1);
+        final Set<AvailabilityRelease> result = sut.merge(createReleases(0, 2, 0), available);
+
+        final AvailabilityRelease latestStable = result.stream()
+                .filter(ar -> LATEST_STABLE_VERSION.equals(ar.getRelease().getVersion()))
+                .findFirst().orElse(null);
+
+        assertEquals(latestAvailable.getName(), latestStable.getRelease().getName());
+    }
+
+    @Test
     public void merge_AllSnapshotReleases_NoLatestStableFound() throws Exception {
         final Set<AvailabilityRelease> result = sut.merge(createReleases(0, 0, 2), createReleases(1, 0, 2));
 

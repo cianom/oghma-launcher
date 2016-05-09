@@ -49,7 +49,7 @@ import java.util.prefs.Preferences;
  */
 public class Controller implements Initializable {
 
-    private static final String       VERSION                = "1.0.0";
+    private static final String       VERSION                = "0.1.0";
     private static final String       OGHMA_SELECTED_RELEASE = "oghma.selected.release";
     private final        Set<Release> downloaded             = new HashSet<>();
     private final ReleaseInstaller installer;

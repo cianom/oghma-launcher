@@ -32,7 +32,7 @@
                   <Button fx:id="cancelDownloadButton" mnemonicParsing="false" style="-fx-background-color: #FF5555;" text="cancel" textFill="WHITE" visible="false" />
                </children>
             </VBox>
-            <ComboBox fx:id="versions" layoutX="122.0" layoutY="240.0" prefWidth="150.0" style="-fx-background-color: #55CCFF;" />
+            <ComboBox fx:id="versions" layoutX="106.0" layoutY="240.0" prefHeight="25.0" prefWidth="183.0" style="-fx-background-color: #55CCFF;" />
             <Canvas fx:id="picoCanvas" height="160.0" layoutX="117.0" layoutY="47.0" width="160.0" />
             <Label fx:id="versionLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="25.0" prefWidth="394.0" style="-fx-background-color: #db9041;" textFill="WHITE" visible="false" />
             <HBox alignment="CENTER" layoutX="122.0" layoutY="265.0" prefHeight="32.0" prefWidth="150.0">

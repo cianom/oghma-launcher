@@ -63,7 +63,7 @@ public class Release {
         return version;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 

@@ -44,8 +44,7 @@ public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
     public static Optional<AvailabilityRelease> createLatestStable(final Set<AvailabilityRelease> selection) {
         return selection.stream()
                 .filter(AvailabilityRelease::isStable)
-                .sorted()
-                .findFirst()
+                .max(AvailabilityRelease::compareTo)
                 .map(ar -> {
                     final Release stable = new LatestStableRelease(ar.getRelease());
                     return (ar.isDownloaded())

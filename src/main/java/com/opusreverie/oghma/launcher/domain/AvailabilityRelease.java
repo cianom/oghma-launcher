@@ -92,6 +92,9 @@ public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
      */
     @Override
     public int compareTo(final AvailabilityRelease o) {
+        if (o.isSnapshot() != isSnapshot()) {
+            return (o.isSnapshot()) ? 1 : -1;
+        }
         final String[] vals1 = release.getVersion().split("\\.");
         final String[] vals2 = o.getRelease().getVersion().split("\\.");
         int i = 0;

@@ -104,7 +104,8 @@ public class Release {
 
     @Override
     public String toString() {
-        return version + " " + name + (snapshot ? " (rolling)" : "");
+        final String versionString = (snapshot) ? "" : (version + " ");
+        return versionString + name + (snapshot ? " (rolling)" : "");
     }
 
     @Override

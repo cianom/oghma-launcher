@@ -117,6 +117,9 @@ public class ReleaseListBuilderTest {
 
         // 1 "Latest Stable", 3 stable, 2 snapshots.
         assertEquals(6, result.size());
+
+        // Test descending sort ("Latest Stable" should be first).
+        assertEquals(LATEST_STABLE_VERSION, result.iterator().next().getRelease().getVersion());
     }
 
 

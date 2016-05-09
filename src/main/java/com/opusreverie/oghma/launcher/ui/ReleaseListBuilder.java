@@ -3,10 +3,7 @@ package com.opusreverie.oghma.launcher.ui;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.Release;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Presentation service which, given lists of downloaded and downloadable
@@ -46,11 +43,11 @@ class ReleaseListBuilder {
      * <p/>
      * Expired snapshots are filtered out, and reference releases like
      * "Latest Stable" are added to the final list. The final list
-     * will be sorted.
+     * will be sorted in descending order (newest releases first).
      */
-    Set<AvailabilityRelease> merge(final Collection<Release> downloadedList, final Collection<Release> available) {
+    SortedSet<AvailabilityRelease> merge(final Collection<Release> downloadedList, final Collection<Release> available) {
         final Set<Release> downloaded = new HashSet<>(downloadedList);
-        final Set<AvailabilityRelease> resultSet = new LinkedHashSet<>();
+        final SortedSet<AvailabilityRelease> resultSet = new TreeSet<>(Collections.reverseOrder());
 
         // Remove expired downloaded.
         final Set<Release> expired = findExpiredSnapshots(downloaded, available);

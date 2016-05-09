@@ -13,16 +13,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LauncherVersion {
 
 
-    @JsonProperty("version")
-    private final String version;
+    @JsonProperty("minimumVersion")
+    private final String minimumVersion;
+
+    @JsonProperty("recommendedVersion")
+    private final String recommendedVersion;
 
     @JsonCreator
-    public LauncherVersion(@JsonProperty("version") final String version) {
-        this.version = version;
+    public LauncherVersion(@JsonProperty("minimumVersion") final String minimumVersion,
+                           @JsonProperty("recommendedVersion") final String recommendedVersion) {
+        this.minimumVersion = minimumVersion;
+        this.recommendedVersion = recommendedVersion;
     }
 
-    public String getVersion() {
-        return version;
+    public String getMinimumVersion() {
+        return minimumVersion;
+    }
+
+    public String getRecommendedVersion() {
+        return recommendedVersion;
+    }
+
+    public SemanticVersion getSemanticMinimum() {
+        return new SemanticVersion(minimumVersion);
+    }
+
+    public SemanticVersion getSemanticRecommended() {
+        return new SemanticVersion(recommendedVersion);
     }
 
 }

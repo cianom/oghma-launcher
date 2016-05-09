@@ -5,6 +5,7 @@ import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.LauncherVersion;
 import com.opusreverie.oghma.launcher.domain.Release;
+import com.opusreverie.oghma.launcher.domain.SemanticVersion;
 import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
 import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
 import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
@@ -121,8 +122,15 @@ public class Controller implements Initializable {
         }
 
         updateConnectivity(false);
-        new ReleaseService(serviceUri).getReleasesWithRetry().thenAccept(this::setAvailableReleases);
-        new LauncherVersionService(serviceUri).getLatestVersionWithRetry().thenAccept(this::setLauncherVersionStatus);
+        new LauncherVersionService(serviceUri)
+                .getLatestVersionWithRetry()
+                .thenAccept(lv -> {
+                    final boolean versionOK = validateLauncherVersionStatus(lv);
+                    if (versionOK) {
+                        new ReleaseService(serviceUri).getReleasesWithRetry()
+                                .thenAccept(this::setAvailableReleases);
+                    }
+                });
 
         versions.setOnAction(evt -> selectRelease(versions.getSelectionModel().getSelectedItem()));
     }
@@ -188,13 +196,23 @@ public class Controller implements Initializable {
         this.downloaded.addAll(downloaded);
     }
 
-    private void setLauncherVersionStatus(final LauncherVersion version) {
-        if (!VERSION.equalsIgnoreCase(version.getVersion())) {
+    private boolean validateLauncherVersionStatus(final LauncherVersion version) {
+        final SemanticVersion thisVersion = new SemanticVersion(VERSION);
+
+        if (thisVersion.compareTo(version.getSemanticMinimum()) < 0) {
+            Platform.runLater(() -> {
+                versionLabel.setVisible(true);
+                versionLabel.setText("Launcher version unsupported. Get latest at www.oghma.io");
+            });
+            return false;
+        }
+        else if (thisVersion.compareTo(version.getSemanticRecommended()) < 0) {
             Platform.runLater(() -> {
                 versionLabel.setVisible(true);
                 versionLabel.setText("New launcher available from www.oghma.io");
             });
         }
+        return true;
     }
 
     private void setAvailableReleases(final Collection<Release> available) {

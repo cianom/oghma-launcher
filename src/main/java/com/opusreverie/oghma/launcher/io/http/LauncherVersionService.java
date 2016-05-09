@@ -19,7 +19,7 @@ public class LauncherVersionService extends BaseRestService {
     }
 
     public CompletableFuture<LauncherVersion> getLatestVersionWithRetry() {
-        return getWithRetry(new GenericType<LauncherVersion>() {}, "launcher/latest/version", 0);
+        return getWithRetry(new GenericType<LauncherVersion>() {}, "launcher/version", 0);
     }
 
 }

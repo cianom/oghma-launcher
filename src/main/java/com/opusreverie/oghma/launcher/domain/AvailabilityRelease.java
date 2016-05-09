@@ -95,21 +95,9 @@ public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
         if (o.isSnapshot() != isSnapshot()) {
             return (o.isSnapshot()) ? 1 : -1;
         }
-        final String[] vals1 = release.getVersion().split("\\.");
-        final String[] vals2 = o.getRelease().getVersion().split("\\.");
-        int i = 0;
-        // Set index to first non-equal ordinal or length of shortest version string.
-        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
-            i++;
-        }
-        // Compare first non-equal ordinal number.
-        if (i < vals1.length && i < vals2.length) {
-            final int diff = Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i]));
-            return Integer.signum(diff);
-        }
-        // The strings are equal or one string is a substring of the other
-        // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
-        return Integer.signum(vals1.length - vals2.length);
+        final SemanticVersion thisVersion = new SemanticVersion(getRelease().getVersion());
+        final SemanticVersion thatVersion = new SemanticVersion(o.getRelease().getVersion());
+        return thisVersion.compareTo(thatVersion);
     }
 
 }

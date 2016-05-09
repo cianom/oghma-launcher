@@ -1,6 +1,7 @@
 package com.opusreverie.oghma.launcher.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -32,13 +33,17 @@ public class Release {
     @JsonProperty("binary")
     private final Content binary;
 
+    @JsonProperty("snapshot")
+    private final boolean snapshot;
+
     @JsonProperty("content")
     private final List<Content> content;
 
     @JsonCreator
     public Release(@JsonProperty("version") String version, @JsonProperty("name") String name,
                    @JsonProperty("releasedOn") Date releasedOn, @JsonProperty("oghon") String oghon,
-                   @JsonProperty("binary") Content binary, @JsonProperty("content") List<Content> content) {
+                   @JsonProperty("snapshot") boolean snapshot, @JsonProperty("binary") Content binary,
+                   @JsonProperty("content") List<Content> content) {
         Objects.requireNonNull(version);
         Objects.requireNonNull(name);
         Objects.requireNonNull(releasedOn);
@@ -50,6 +55,7 @@ public class Release {
         this.releasedOn = releasedOn;
         this.oghon = oghon;
         this.binary = binary;
+        this.snapshot = snapshot;
         this.content = content;
     }
 
@@ -57,7 +63,7 @@ public class Release {
         return version;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
@@ -69,21 +75,26 @@ public class Release {
         return oghon;
     }
 
+    public boolean isSnapshot() {
+        return snapshot;
+    }
+
+    @JsonIgnore
     public List<Content> getBinaryAndContent() {
         final List<Content> all = new ArrayList<>(getContent());
         all.add(getBinary());
         return all;
     }
 
-    public boolean isSnapshotUpdate(final Release other) {
-        return isSameVersion(other) && !equals(other);
+    public boolean isExpiredSnapshot(final Release newer) {
+        return isSameVersion(newer) && !equals(newer);
     }
 
-    public boolean isSameVersion(final Release other) {
+    private boolean isSameVersion(final Release other) {
         return getVersion().equalsIgnoreCase(other.getVersion());
     }
 
-    public Content getBinary() {
+    Content getBinary() {
         return binary;
     }
 
@@ -93,7 +104,7 @@ public class Release {
 
     @Override
     public String toString() {
-        return version + " " + name;
+        return version + " " + name + (snapshot ? " (rolling)" : "");
     }
 
     @Override
@@ -113,4 +124,5 @@ public class Release {
     public int hashCode() {
         return Objects.hash(version, name, releasedOn, oghon, binary, content);
     }
+
 }

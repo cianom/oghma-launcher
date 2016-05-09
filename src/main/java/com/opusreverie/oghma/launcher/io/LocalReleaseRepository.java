@@ -39,7 +39,7 @@ public class LocalReleaseRepository {
         this.fileHandler = fileHandler;
     }
 
-    public void writeReleaseMeta(final Release release) throws IOException {
+    void writeReleaseMeta(final Release release) throws IOException {
         final String version = release.getVersion();
 
         final Path releaseDir = dirResolver.getReleaseDir(version);
@@ -49,6 +49,17 @@ public class LocalReleaseRepository {
         try (final OutputStream out = fileHandler.getOutputStream(outPath)) {
             decoder.write(out, release);
         }
+    }
+
+    /**
+     * Delete a downloaded release from disk.
+     *
+     * @param release the release to delete.
+     * @throws IOException if the release could not be deleted from disk.
+     */
+    public void deleteRelease(final Release release) throws IOException {
+        final Path dir = dirResolver.getReleaseDir(release.getVersion());
+        fileHandler.deleteRecursive(dir);
     }
 
     public List<Release> findAvailableReleases(final Notifier notifier) throws LauncherException {

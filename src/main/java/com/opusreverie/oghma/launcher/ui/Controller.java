@@ -49,43 +49,30 @@ import java.util.prefs.Preferences;
  */
 public class Controller implements Initializable {
 
-    private static final String VERSION = "1.0.0";
-    private static final String OGHMA_SELECTED_RELEASE = "oghma.selected.release";
-
+    private static final String       VERSION                = "1.0.0";
+    private static final String       OGHMA_SELECTED_RELEASE = "oghma.selected.release";
+    private final        Set<Release> downloaded             = new HashSet<>();
+    private final ReleaseInstaller installer;
     @FXML
-    Canvas picoCanvas;
-
+    Canvas                        picoCanvas;
     @FXML
-    Button playButton;
-
+    Button                        playButton;
     @FXML
-    Button downloadButton;
-
+    Button                        downloadButton;
     @FXML
-    Button cancelDownloadButton;
-
+    Button                        cancelDownloadButton;
     @FXML
-    Pane pane;
-
+    Pane                          pane;
     @FXML
-    Label versionLabel;
-
+    Label                         versionLabel;
     @FXML
     ComboBox<AvailabilityRelease> versions;
-
     @FXML
-    HBox notificationBox;
-
+    HBox                          notificationBox;
     @FXML
-    ImageView connectivityIcon;
-
+    ImageView                     connectivityIcon;
     @FXML
-    ImageView newIcon;
-
-    private final Set<Release> downloaded = new HashSet<>();
-
-    private ReleaseInstaller installer;
-
+    ImageView                     newIcon;
     private Notifier notifier;
 
     private OghonDrawer oghonDrawer;
@@ -94,16 +81,20 @@ public class Controller implements Initializable {
 
     private DirectoryResolver dirResolver;
 
+    private LocalReleaseRepository releaseRepository;
+
+    public Controller() {
+        dirResolver = DirectoryResolver.create();
+        releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
+        installer = new ReleaseInstaller(releaseRepository, dirResolver);
+    }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/backend");
 
-        dirResolver = DirectoryResolver.create();
-        LocalReleaseRepository releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
-        installer = new ReleaseInstaller(releaseRepository, dirResolver);
         notifier = new Notifier(notificationBox);
 
         oghonDrawer.drawDefault();
@@ -124,7 +115,8 @@ public class Controller implements Initializable {
             Collection<Release> downloaded = releaseRepository.findAvailableReleases(notifier);
             setDownloadedReleases(downloaded);
             setSelectableReleases(Collections.emptyList());
-        } catch (final LauncherException e) {
+        }
+        catch (final LauncherException e) {
             notifier.notify(e.toString(), NotificationType.ERROR);
         }
 
@@ -160,6 +152,7 @@ public class Controller implements Initializable {
         }
 
     }
+
     private void startDownload(final AvailabilityRelease release) {
         if (release == null) return;
         Platform.runLater(() -> notifier.notify("Starting download " + release, NotificationType.INFO));
@@ -212,8 +205,7 @@ public class Controller implements Initializable {
         });
     }
 
-    private void setUIDownloadState(boolean cancelVisible, boolean downloadVisible, boolean playVisible, boolean versionsDisabled)
-    {
+    private void setUIDownloadState(boolean cancelVisible, boolean downloadVisible, boolean playVisible, boolean versionsDisabled) {
         Platform.runLater(() -> {
             cancelDownloadButton.setVisible(cancelVisible);
             downloadButton.setVisible(downloadVisible);
@@ -222,23 +214,30 @@ public class Controller implements Initializable {
         });
     }
 
+    private void deleteRelease(final Release release) {
+        try {
+            releaseRepository.deleteRelease(release);
+            downloaded.remove(release);
+        }
+        catch (final IOException e) {
+            notifier.notify("Could not remove release " + release + ". Reason: " + e + " Please do so manually",
+                    NotificationType.ERROR);
+        }
+    }
+
     /**
      * Merges downloaded and available lists.
      */
     private Set<AvailabilityRelease> setSelectableReleases(final Collection<Release> available) {
 
-        // Merge
-        final Set<AvailabilityRelease> selectable = new LinkedHashSet<>();
+        final ReleaseListBuilder presenter = new ReleaseListBuilder();
 
-        downloaded.stream()
-                .filter(d -> available.stream().noneMatch(d::isSnapshotUpdate))
-                .map(AvailabilityRelease::downloaded)
-                .forEach(selectable::add);
+        // Delete out of date snapshot downloads.
+        presenter.findExpiredSnapshots(downloaded, available)
+                .forEach(this::deleteRelease);
 
-        available.stream()
-                .filter(a -> !downloaded.contains(a))
-                .map(AvailabilityRelease::available)
-                .forEach(selectable::add);
+        // Merge downloaded and available.
+        final Set<AvailabilityRelease> selectable = presenter.merge(downloaded, available);
 
         Platform.runLater(() -> {
             versions.setItems(FXCollections.observableArrayList(selectable));

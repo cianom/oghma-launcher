@@ -31,10 +31,10 @@ import static com.opusreverie.oghma.launcher.io.download.FileDownloader.Download
  */
 public class ReleaseInstaller {
 
-    private final FileDownloader fileDownloader;
-    private final PackExtractor packExtractor;
+    private final FileDownloader         fileDownloader;
+    private final PackExtractor          packExtractor;
     private final LocalReleaseRepository releaseRepository;
-    private final DirectoryResolver dirResolver;
+    private final DirectoryResolver      dirResolver;
     private final ConcurrentHashMap<Release, Observable<InstallProgressEvent>> fileLocks = new ConcurrentHashMap<>();
 
     public ReleaseInstaller(final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
@@ -51,11 +51,14 @@ public class ReleaseInstaller {
 
     public Observable<InstallProgressEvent> install(final Release release) {
 
-        final Observable<InstallProgressEvent> stream = Observable.<InstallProgressEvent>create(subscriber -> install(release, subscriber)).subscribeOn(Schedulers.io());
+        final Observable<InstallProgressEvent> stream = Observable
+                .<InstallProgressEvent>create(subscriber -> install(release, subscriber))
+                .subscribeOn(Schedulers.io());
 
         if (lock(release, stream)) {
             return stream;
-        } else {
+        }
+        else {
             return Observable.error(new IllegalStateException("Download already running"));
         }
     }
@@ -69,12 +72,14 @@ public class ReleaseInstaller {
 
             try {
                 releaseRepository.writeReleaseMeta(release);
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 subscriber.onError(e);
             }
 
             subscriber.onCompleted();
-        } finally {
+        }
+        finally {
             unlock(release);
         }
     }
@@ -114,31 +119,31 @@ public class ReleaseInstaller {
         fileLocks.remove(release);
     }
 
-    public static class Install {
+    private static class Install {
 
         private final Map<Content, Long> progress;
         private final Set<Content> extracted = new HashSet<>();
 
-        public Install(final Release release) {
+        Install(final Release release) {
             this.progress = release.getBinaryAndContent().stream().collect(Collectors.toMap(c1 -> c1, c2 -> 0L));
         }
 
-        public Install updateDownloadProgress(final Content file, final long downloadedBytes) {
+        Install updateDownloadProgress(final Content file, final long downloadedBytes) {
             progress.put(file, downloadedBytes);
             return this;
         }
 
-        public Install updateExtractProgress(final Content file) {
+        Install updateExtractProgress(final Content file) {
             extracted.add(file);
             return this;
         }
 
-        public InstallProgressEvent getProgress() {
+        InstallProgressEvent getProgress() {
             final long downloadedBytes = progress.values().stream().mapToLong(l -> l).sum();
             final long totalBytes = progress.keySet().stream().mapToLong(Content::getSizeBytes).sum();
-            final double downloadPercentage = ((double)downloadedBytes) / ((double)totalBytes);
+            final double downloadPercentage = ((double) downloadedBytes) / ((double) totalBytes);
 
-            final double extractPercentage = ((double) extracted.size()) / ((double)progress.size());
+            final double extractPercentage = ((double) extracted.size()) / ((double) progress.size());
 
             return new InstallProgressEvent(downloadPercentage, extractPercentage);
         }

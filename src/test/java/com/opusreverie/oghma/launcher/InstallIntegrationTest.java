@@ -65,7 +65,7 @@ public class InstallIntegrationTest {
     @Test
     public void testSuccessfulInstall() throws Throwable {
         // Given
-        Release release = ReleaseTestUtil.createTestRelease(5);
+        Release release = ReleaseTestUtil.createTestRelease(5, false);
 
         // When
         ReactiveResult<InstallProgressEvent> r = ReactiveResult.of(installer.install(release));

@@ -5,6 +5,7 @@ import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.stream.Collectors;
 
 /**
  * Handler for basic filesystem operations.
@@ -17,6 +18,19 @@ public class FileHandler {
 
     public boolean exists(final Path file) throws SecurityException {
         return Files.exists(file);
+    }
+
+    /**
+     * Delete recursively. If the file argument is a directory, it will be
+     * completely deleted.
+     */
+    public boolean deleteRecursive(final Path file) throws IOException, SecurityException {
+        if (Files.isDirectory(file)) {
+            for (Path dirFile : Files.list(file).collect(Collectors.toList())) {
+                deleteRecursive(dirFile);
+            }
+        }
+        return delete(file);
     }
 
     public boolean delete(final Path file) throws SecurityException {

@@ -144,13 +144,12 @@ public class Controller implements Initializable {
         try {
             new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
             preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
-            System.exit(0);
+//            System.exit(0);
         }
         catch (IOException e) {
             final String errorMsg = MessageFormat.format("Could not start version. Reason: [{0}]", e.getMessage());
             notifier.notify(errorMsg, NotificationType.ERROR);
         }
-
     }
 
     private void startDownload(final AvailabilityRelease release) {

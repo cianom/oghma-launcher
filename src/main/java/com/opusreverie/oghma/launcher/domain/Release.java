@@ -86,6 +86,11 @@ public class Release {
         return all;
     }
 
+    @JsonIgnore
+    public String getDirectory() {
+        return snapshot ? name.toLowerCase() : version;
+    }
+
     public boolean isExpiredSnapshot(final Release newer) {
         return isSameVersion(newer) && !equals(newer);
     }

@@ -34,8 +34,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import rx.Subscription;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
@@ -148,13 +150,25 @@ public class Controller implements Initializable {
     private void playVersion(final AvailabilityRelease release) {
         if (!release.isDownloaded()) notifier.notify("Release not available to play", NotificationType.ERROR);
 
-        final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getVersion());
+        final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getDirectory());
         try {
-            new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
+            final Process process = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
             preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
-//            System.exit(0);
+            final int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                System.exit(0);
+            }
+            else {
+                notifier.notify("Game closed unexpectedly with code " + exitCode, NotificationType.ERROR);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    notifier.notify("Error: " + line, NotificationType.ERROR);
+                }
+            }
         }
-        catch (IOException e) {
+        catch (IOException | InterruptedException e) {
             final String errorMsg = MessageFormat.format("Could not start version. Reason: [{0}]", e.getMessage());
             notifier.notify(errorMsg, NotificationType.ERROR);
         }

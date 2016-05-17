@@ -40,7 +40,7 @@ public class LocalReleaseRepository {
     }
 
     void writeReleaseMeta(final Release release) throws IOException {
-        final String identifier = (release.isSnapshot()) ? release.getName().toLowerCase() : release.getVersion();
+        final String identifier = release.getDirectory();
 
         final Path releaseDir = dirResolver.getReleaseDir(identifier);
         fileHandler.createDirectories(releaseDir);
@@ -58,7 +58,7 @@ public class LocalReleaseRepository {
      * @throws IOException if the release could not be deleted from disk.
      */
     public void deleteRelease(final Release release) throws IOException {
-        final Path dir = dirResolver.getReleaseDir(release.getVersion());
+        final Path dir = dirResolver.getReleaseDir(release.getDirectory());
         fileHandler.deleteRecursive(dir);
     }
 

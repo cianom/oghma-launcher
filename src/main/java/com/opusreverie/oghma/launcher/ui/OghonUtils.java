@@ -13,7 +13,41 @@ public class OghonUtils {
 
 
     public static void main(String[] args) {
-        System.out.println(genOghon020String());
+        System.out.println(genOghonNightlyString());
+    }
+
+
+    public static String genOghonNightlyString() {
+        long[][] encoded = new long[4][4];
+        encoded[0][0] = encodeData(false, Color.WHITE, Color.web("#672178ff"));
+        encoded[1][0] = encodeData(true, Color.web("#440055ff"), Color.web("#2d1650ff"));
+        encoded[2][0] = encodeData(false, Color.web("#11002bff"), Color.web("#440055ff"));
+        encoded[3][0] = encodeData(true, Color.web("#550044ff"), Color.WHITE);
+
+        encoded[0][1] = encodeData(true, Color.web("#225500ff"), Color.web("#d42affff"));
+        encoded[1][1] = encodeData(true, Color.web("#bc5fd3ff"), Color.web("#aa00d4ff"));
+        encoded[2][1] = encodeData(false, Color.web("#cc00ffff"), Color.web("#dd55ffff"));
+        encoded[3][1] = encodeData(false, Color.web("#ff80e5ff"), Color.web("#112b00ff"));
+
+        encoded[0][2] = encodeData(true, Color.web("#1a1a1aff"), Color.web("#0b2817ff"));
+        encoded[1][2] = encodeData(true, Color.web("#002b00ff"), Color.web("#ff80e5ff"));
+        encoded[2][2] = encodeData(false, Color.web("#e580ffff"), Color.web("#17280bff"));
+        encoded[3][2] = encodeData(false, Color.web("#22280bff"), Color.web("#24221cff"));
+
+        encoded[0][3] = encodeData(true, Color.WHITE, Color.web("#000000ff"));
+        encoded[1][3] = encodeData(true, Color.web("#000000ff"), Color.web("#22241cff"));
+        encoded[2][3] = encodeData(false, Color.web("#1a1a1aff"), Color.web("#000000ff"));
+        encoded[3][3] = encodeData(false, Color.web("#1a1a1aff"), Color.WHITE);
+
+        StringBuilder s = new StringBuilder();
+        for (int y = 0; y < encoded[0].length; y++) {
+            for (int x = 0; x < encoded.length; x++) {
+                s.append(Long.toHexString(encoded[x][y]));
+                s.append(',');
+            }
+            s.append(';');
+        }
+        return s.toString();
     }
 
     public static String genOghon020String() {

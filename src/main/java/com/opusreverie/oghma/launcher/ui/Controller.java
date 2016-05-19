@@ -53,7 +53,7 @@ import java.util.prefs.Preferences;
 public class Controller implements Initializable {
 
     private static final String       VERSION                = "0.1.0";
-    private static final String       OGHMA_SELECTED_RELEASE = "oghma.selected.release";
+    private static final String       OGHMA_SELECTED_RELEASE = "last.selected.release";
     private final        Set<Release> downloaded             = new HashSet<>();
     private final ReleaseInstaller installer;
     @FXML
@@ -301,7 +301,7 @@ public class Controller implements Initializable {
     }
 
     private Preferences preferences() {
-        return Preferences.userRoot().node(this.getClass().getName());
+        return Preferences.userRoot().node("io.lyra.oghma.launcher");
     }
 
 }

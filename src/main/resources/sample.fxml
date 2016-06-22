@@ -47,6 +47,7 @@
                         <Image url="@icon/new.png" />
                      </image>
                   </ImageView>
+                  <CheckBox fx:id="chkWindowed" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" visible="true" />
                </children>
             </HBox>
             <HBox fx:id="notificationBox" alignment="CENTER" layoutY="369.0" prefHeight="25.0" prefWidth="394.0" />

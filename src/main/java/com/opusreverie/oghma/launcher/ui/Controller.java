@@ -24,10 +24,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -54,8 +51,10 @@ public class Controller implements Initializable {
 
     private static final String       VERSION                = "0.1.0";
     private static final String       OGHMA_SELECTED_RELEASE = "last.selected.release";
+    private static final String       PROPERTY_WINDOWED      = "oghma.windowed";
     private final        Set<Release> downloaded             = new HashSet<>();
     private final ReleaseInstaller installer;
+
     @FXML
     Canvas                        picoCanvas;
     @FXML
@@ -76,6 +75,9 @@ public class Controller implements Initializable {
     ImageView                     connectivityIcon;
     @FXML
     ImageView                     newIcon;
+    @FXML
+    CheckBox                      chkWindowed;
+
     private Notifier notifier;
 
     private OghonDrawer oghonDrawer;
@@ -103,8 +105,7 @@ public class Controller implements Initializable {
         oghonDrawer.drawDefault();
         setComboStyle();
         newIcon.managedProperty().bind(newIcon.visibleProperty());
-        Tooltip tt = new Tooltip("found new releases available to download");
-        Tooltip.install(newIcon, tt);
+        Tooltip.install(newIcon, new Tooltip("found new releases available to download"));
 
         playButton.managedProperty().bind(playButton.visibleProperty());
         playButton.setOnAction(evt -> playVersion(versions.getSelectionModel().getSelectedItem()));
@@ -112,6 +113,9 @@ public class Controller implements Initializable {
         downloadButton.setOnAction(evt -> startDownload(versions.getSelectionModel().getSelectedItem()));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setOnAction(evt -> cancelDownload(versions.getSelectionModel().getSelectedItem()));
+        chkWindowed.setSelected(isWindowed());
+        chkWindowed.selectedProperty().addListener((observable, oldValue, newValue) -> setWindowed(newValue));
+        Tooltip.install(chkWindowed, new Tooltip("run oghma in windowed mode"));
 
         try {
             new FileSystemInitializer(dirResolver).setUpFileSystemStructure();
@@ -147,12 +151,23 @@ public class Controller implements Initializable {
         setUIDownloadState(false, !release.isDownloaded(), release.isDownloaded(), false);
     }
 
+    private List<String> constructPlayCommand(final File jarPath) {
+        final List<String> cmd = new ArrayList<>();
+        cmd.add("java");
+        if (isWindowed()) {
+            cmd.add("-D" + PROPERTY_WINDOWED + "=true");
+        }
+        cmd.add("-jar");
+        cmd.add(jarPath.getAbsolutePath());
+        return cmd;
+    }
+
     private void playVersion(final AvailabilityRelease release) {
         if (!release.isDownloaded()) notifier.notify("Release not available to play", NotificationType.ERROR);
 
         final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getDirectory());
         try {
-            final Process process = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath()).start();
+            final Process process = new ProcessBuilder(constructPlayCommand(jarFile)).start();
             preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
             final int exitCode = process.waitFor();
 
@@ -302,6 +317,14 @@ public class Controller implements Initializable {
 
     private Preferences preferences() {
         return Preferences.userRoot().node("io.lyra.oghma.launcher");
+    }
+
+    private boolean isWindowed() {
+        return preferences().getBoolean(PROPERTY_WINDOWED, false);
+    }
+
+    private void setWindowed(final boolean windowed) {
+        preferences().putBoolean(PROPERTY_WINDOWED, windowed);
     }
 
 }

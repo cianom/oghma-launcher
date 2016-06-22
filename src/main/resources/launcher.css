@@ -1,0 +1,14 @@
+
+.check-box>.box {
+  -fx-background-color: rgba(0, 0, 100, 0.1);
+  -fx-background-insets: 0;
+
+  -fx-background-image: url("icon/windowed.png");
+  -fx-background-position: center;
+  -fx-background-repeat: stretch;
+  -fx-background-size: 75% 75%;
+}
+
+.check-box>.box:hover {
+  -fx-background-color: rgba(150, 200, 255, 1);
+}

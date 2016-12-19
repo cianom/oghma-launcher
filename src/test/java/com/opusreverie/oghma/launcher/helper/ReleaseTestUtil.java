@@ -30,11 +30,11 @@ public class ReleaseTestUtil {
     }
 
     public static Content createTestContent(int index) {
-        return new Content("http://" + index, "path/" + index, 1366, HASH);
+        return new Content("http://" + index, "path/" + index, 1390, HASH);
     }
 
     public static Content createTestPack(int index) {
-        return new Content("http://" + index, "path/" + index + ".op1", 1366, HASH);
+        return new Content("http://" + index, "path/" + index + ".op1", 1390, HASH);
     }
 
 }

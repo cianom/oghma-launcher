@@ -96,7 +96,7 @@ public class FileDownloader {
         while ((read = in.read(buffer)) != -1 && !subscriber.isUnsubscribed()) {
             downloadedBytes += read;
             if (downloadedBytes > totalExpectedBytes) {
-                throw new IllegalStateException("Downloaded more bytes than expected");
+                throw new IllegalStateException("Downloaded more bytes than expected: " + downloadedBytes + "/" + totalExpectedBytes);
             }
             out.write(buffer, 0, read);
             subscriber.onNext(new DownloadProgressEvent(downloadedBytes));

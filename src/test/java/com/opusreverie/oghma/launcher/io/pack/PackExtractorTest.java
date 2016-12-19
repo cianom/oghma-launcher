@@ -39,7 +39,7 @@ public class PackExtractorTest {
 
     @Before
     public void setUp() throws Exception {
-        classUnderTest = new PackExtractor(mockFileHandler, DirectoryResolver.ofRoot(Paths.get("/pack")));
+        classUnderTest = new PackExtractor(mockFileHandler, DirectoryResolver.ofRoot(Paths.get("pack")));
 
         when(mockFileHandler.exists(any(Path.class))).thenReturn(true, false);
     }
@@ -48,7 +48,7 @@ public class PackExtractorTest {
     public void testExtract_success() throws Throwable {
         // Given
         when(mockFileHandler.getInputStream(any(Path.class))).then(invocationOnMock ->
-                PackExtractorTest.class.getResourceAsStream(invocationOnMock.getArguments()[0].toString()));
+                PackExtractorTest.class.getResourceAsStream("/" + invocationOnMock.getArguments()[0].toString()));
 
         // When
         ReactiveResult r = ReactiveResult.of(classUnderTest.extract(FILE));

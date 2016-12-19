@@ -1,5 +1,7 @@
 package com.opusreverie.oghma.launcher.common;
 
+import io.lyra.oghma.common.OghmaException;
+
 /**
  * Generic unchecked Launcher exception.
  * <p>
@@ -7,27 +9,22 @@ package com.opusreverie.oghma.launcher.common;
  *
  * @author Cian O'Mahony
  */
-public class LauncherException extends RuntimeException
-{
+public class LauncherException extends OghmaException {
 
-    public LauncherException(String message)
-    {
+    public LauncherException(String message) {
         super(message);
     }
 
-    public LauncherException(String message, Throwable cause)
-    {
+    public LauncherException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public LauncherException(Throwable cause)
-    {
+    public LauncherException(Throwable cause) {
         super(cause);
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return getLocalizedMessage();
     }
 

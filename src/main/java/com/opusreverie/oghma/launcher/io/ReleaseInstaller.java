@@ -1,11 +1,11 @@
 package com.opusreverie.oghma.launcher.io;
 
-import com.opusreverie.oghma.launcher.common.ContentType;
 import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.domain.Release;
 import com.opusreverie.oghma.launcher.io.download.FileDownloader;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.pack.PackExtractor;
+import io.lyra.oghma.common.content.ContentType;
+import io.lyra.oghma.common.io.DirectoryResolver;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -106,7 +106,7 @@ public class ReleaseInstaller {
     }
 
     private boolean isExtractable(final Content file, final Subscriber<?> subscriber) {
-        return !dirResolver.isInstalled(file)
+        return !dirResolver.isInstalled(file.getPath(), file.getSha256Hash())
                 && !subscriber.isUnsubscribed()
                 && ContentType.isPack(file.getPath());
     }

@@ -1,5 +1,7 @@
 package com.opusreverie.oghma.launcher.domain;
 
+import io.lyra.oghma.common.content.SemanticVersion;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,7 +70,7 @@ public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
         return downloaded;
     }
 
-    public void setDownloaded(boolean downloaded) {
+    public void setDownloaded(final boolean downloaded) {
         this.downloaded = downloaded;
     }
 

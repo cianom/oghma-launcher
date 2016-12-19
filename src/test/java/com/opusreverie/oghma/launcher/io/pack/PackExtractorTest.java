@@ -3,7 +3,7 @@ package com.opusreverie.oghma.launcher.io.pack;
 import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.helper.ReactiveResult;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
+import io.lyra.oghma.common.io.DirectoryResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +69,8 @@ public class PackExtractorTest {
 
         // When
         classUnderTest.extract(FILE).toBlocking()
-                .subscribe(__ -> {}, ex -> errorCounter.incrementAndGet());
+                .subscribe(__ -> {
+                }, ex -> errorCounter.incrementAndGet());
 
         // Then
         assertEquals(1, errorCounter.get());
@@ -89,7 +90,8 @@ public class PackExtractorTest {
 
         // When
         classUnderTest.extract(FILE).toBlocking()
-                .subscribe(__ -> {}, ex -> errorCounter.incrementAndGet());
+                .subscribe(__ -> {
+                }, ex -> errorCounter.incrementAndGet());
 
         // Then
         assertEquals(1, errorCounter.get());

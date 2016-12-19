@@ -1,6 +1,6 @@
 package com.opusreverie.oghma.launcher.helper;
 
-import com.opusreverie.oghma.launcher.common.ContentType;
+import io.lyra.oghma.common.content.ContentType;
 
 import java.io.*;
 import java.util.zip.ZipEntry;
@@ -8,7 +8,9 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Created by keen on 15/02/16.
+ * Utility for pack tests.
+ *
+ * @author Cian.
  */
 public class PackTestUtil {
 

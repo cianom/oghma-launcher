@@ -2,7 +2,7 @@ package com.opusreverie.oghma.launcher.io.download;
 
 import com.opusreverie.oghma.launcher.domain.Content;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
+import io.lyra.oghma.common.io.DirectoryResolver;
 import org.apache.commons.codec.digest.DigestUtils;
 import rx.Observable;
 import rx.Subscriber;
@@ -55,7 +55,7 @@ public class FileDownloader {
                 long totalBytes = file.getSizeBytes();
                 final String url = file.getUrl();
 
-                final Path outPath = dirResolver.getDownloadPath(file);
+                final Path outPath = dirResolver.resolveRelativeRoot(file.getPath());
                 if (lengthDiffers(totalBytes, outPath) || hashDiffers(file)) {
 
                     fileHandler.deleteIfExists(outPath);
@@ -76,7 +76,8 @@ public class FileDownloader {
                     validateHash(file);
                 }
 
-            } catch (IOException | ProcessingException | NoSuchAlgorithmException | IllegalStateException ex) {
+            }
+            catch (IOException | ProcessingException | NoSuchAlgorithmException | IllegalStateException ex) {
                 subscriber.onError(ex);
             }
 
@@ -88,7 +89,7 @@ public class FileDownloader {
     }
 
     private void transferStreams(final InputStream in, final OutputStream out, final Subscriber<? super DownloadProgressEvent> subscriber,
-            final long totalExpectedBytes) throws IOException {
+                                 final long totalExpectedBytes) throws IOException {
         int read;
         final byte[] buffer = new byte[BUFFER_SIZE];
         long downloadedBytes = 0;
@@ -103,7 +104,7 @@ public class FileDownloader {
     }
 
     private void validateHash(final Content file) throws IOException, NoSuchAlgorithmException, IllegalStateException {
-        final byte[] data = fileHandler.readAllBytes(dirResolver.getDownloadPath(file));
+        final byte[] data = fileHandler.readAllBytes(dirResolver.resolveRelativeRoot(file.getPath()));
         final String digest = DigestUtils.sha256Hex(data);
 
         if (!Objects.equals(digest, file.getSha256Hash())) {
@@ -116,7 +117,8 @@ public class FileDownloader {
         boolean differs = false;
         try {
             validateHash(file);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             differs = true;
         }
         return differs;

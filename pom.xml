@@ -12,6 +12,7 @@
         <!-- Use the latest version whenever possible. -->
         <jackson.version>2.6.3</jackson.version>
         <rxjava.version>1.0.16</rxjava.version>
+        <oghma-common.version>0.1.0</oghma-common.version>
     </properties>
 
     <build>
@@ -52,6 +53,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>io.lyra.oghma</groupId>
+            <artifactId>oghma-common</artifactId>
+            <version>${oghma-common.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>

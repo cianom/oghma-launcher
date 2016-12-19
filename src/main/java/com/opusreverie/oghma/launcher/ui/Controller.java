@@ -1,23 +1,23 @@
 package com.opusreverie.oghma.launcher.ui;
 
-import com.opusreverie.oghma.launcher.common.LauncherException;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.LauncherVersion;
 import com.opusreverie.oghma.launcher.domain.Release;
-import com.opusreverie.oghma.launcher.domain.SemanticVersion;
 import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
 import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
 import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
-import com.opusreverie.oghma.launcher.io.file.FileSystemInitializer;
 import com.opusreverie.oghma.launcher.io.http.LauncherVersionService;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
 import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
 import com.opusreverie.oghma.launcher.ui.component.Notifier.NotificationType;
 import com.opusreverie.oghma.launcher.ui.component.OghonDrawer;
+import io.lyra.oghma.common.OghmaException;
+import io.lyra.oghma.common.content.SemanticVersion;
+import io.lyra.oghma.common.io.DirectoryResolver;
+import io.lyra.oghma.common.io.FileSystemInitializer;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -89,7 +89,7 @@ public class Controller implements Initializable {
     private LocalReleaseRepository releaseRepository;
 
     public Controller() {
-        dirResolver = DirectoryResolver.create();
+        dirResolver = DirectoryResolver.ofDefaultRoot();
         releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         installer = new ReleaseInstaller(releaseRepository, dirResolver);
     }
@@ -123,7 +123,7 @@ public class Controller implements Initializable {
             setDownloadedReleases(downloaded);
             setSelectableReleases(Collections.emptyList());
         }
-        catch (final LauncherException e) {
+        catch (final OghmaException e) {
             notifier.notify(e.toString(), NotificationType.ERROR);
         }
 

@@ -9,9 +9,9 @@ import com.opusreverie.oghma.launcher.io.InstallProgressEvent;
 import com.opusreverie.oghma.launcher.io.LocalReleaseRepository;
 import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.download.FileDownloader;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.pack.PackExtractor;
+import io.lyra.oghma.common.io.DirectoryResolver;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +30,9 @@ import java.nio.file.Paths;
 import static org.mockito.Matchers.any;
 
 /**
- * Created by keen on 15/02/16.
+ * Integrated unpack and install test.
+ *
+ * @author Cian.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class InstallIntegrationTest {
@@ -45,7 +47,7 @@ public class InstallIntegrationTest {
     @Before
     public void setUp() throws Exception {
         // Behaviour
-        Mockito.when(mockFileHandler.readAllBytes(any(Path.class))).thenReturn(new byte[] {1, 2});
+        Mockito.when(mockFileHandler.readAllBytes(any(Path.class))).thenReturn(new byte[]{1, 2});
         Mockito.when(mockFileHandler.getInputStream(any(Path.class))).then(__ -> PackTestUtil.createPackAsStream());
         Mockito.when(mockFileHandler.getOutputStream(any(Path.class))).then(__ -> new ByteArrayOutputStream());
 

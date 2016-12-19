@@ -2,6 +2,7 @@ package com.opusreverie.oghma.launcher.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.lyra.oghma.common.content.SemanticVersion;
 
 /**
  * Information on the latest launcher version.

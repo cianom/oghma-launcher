@@ -1,8 +1,8 @@
 package com.opusreverie.oghma.launcher.io.pack;
 
 import com.opusreverie.oghma.launcher.domain.Content;
-import com.opusreverie.oghma.launcher.io.file.DirectoryResolver;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
+import io.lyra.oghma.common.io.DirectoryResolver;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -44,7 +44,7 @@ public class PackExtractor {
     public Observable<ExtractEvent> extract(final Content packFile) {
         return Observable.create(subscriber -> {
             try {
-                final Path outPath = dirResolver.getDownloadPath(packFile);
+                final Path outPath = dirResolver.resolveRelativeRoot(packFile.getPath());
 
                 final List<ExtractContent> extracted = extractInMemory(outPath);
 
@@ -87,7 +87,8 @@ public class PackExtractor {
             try {
                 if (writeFileToDisk(c)) created.add(c);
                 subscriber.onNext(new ExtractEvent(++extracted, content.size()));
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 created.stream().map(x -> x.destExtractPath).forEach(fileHandler::delete);
                 throw e;
             }
@@ -117,7 +118,7 @@ public class PackExtractor {
     }
 
     private void markInstalled(final Content packFile) throws IOException {
-        final Path target = dirResolver.getInstalledPath(packFile);
+        final Path target = dirResolver.getInstalledPath(packFile.getPath(), packFile.getSha256Hash());
         fileHandler.createFile(target);
     }
 
@@ -126,7 +127,7 @@ public class PackExtractor {
     }
 
     static class ExtractContent {
-        private final Path destExtractPath;
+        private final Path   destExtractPath;
         private final byte[] fileData;
 
         public ExtractContent(Path destExtractPath, byte[] fileData) {

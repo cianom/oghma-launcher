@@ -82,7 +82,7 @@ public class PackExtractorTest {
     public void testExtract_failureWritingToDisk_cleanUpFiles() throws Exception {
         // Given
         when(mockFileHandler.getInputStream(any(Path.class))).then(invocationOnMock ->
-                PackExtractorTest.class.getResourceAsStream(invocationOnMock.getArguments()[0].toString()));
+                PackExtractorTest.class.getResourceAsStream("/" + invocationOnMock.getArguments()[0].toString()));
         when(mockFileHandler.write(any(Path.class), any(byte[].class)))
                 .thenReturn(null).thenThrow(new IOException("Err"));
         when(mockFileHandler.exists(any(Path.class))).thenReturn(true, false, false);
@@ -98,7 +98,6 @@ public class PackExtractorTest {
         verify(mockFileHandler, times(2)).write(any(Path.class), any(byte[].class));
         verify(mockFileHandler).delete(any(Path.class));
         verify(mockFileHandler, never()).move(any(Path.class), any(Path.class));
-
     }
 
 }

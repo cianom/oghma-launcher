@@ -10,19 +10,15 @@ import java.util.List;
 
 /**
  * Filter that sets the {@value CONTENT_TYPE} HTML response header to application/json.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
-public class JsonContentTypeResponseFilter implements ClientResponseFilter
-{
+public class JsonContentTypeResponseFilter implements ClientResponseFilter {
 
     private static final String CONTENT_TYPE = "Content-Type";
 
     @Override
-    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException
-    {
+    public void filter(final ClientRequestContext requestContext, final ClientResponseContext responseContext) throws IOException {
         final List<String> contentType = new ArrayList<>(1);
         contentType.add(MediaType.APPLICATION_JSON);
         responseContext.getHeaders().put(CONTENT_TYPE, contentType);

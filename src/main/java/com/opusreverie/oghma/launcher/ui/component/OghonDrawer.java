@@ -12,16 +12,13 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Draws oghons with a staggered transition effect on a canvas element.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class OghonDrawer {
 
     private static final String DEFAULT_OGHON = "decd87ffffff,d2a847ffe580,1fff6d5d2a847,1ffffffffeeaa,;1d2a847d38d5f,8000ff9955,1d2a847008000,1d2a847d2a847,;8000d2a847,225500ff00,100ff00003380,1d2a847008000,;10b1728ffffff,3380162d50,1dbdbe3002255,ffffff162d50,;";
-
-    public static final int CANVAS_SIZE = 160;
+    private static final int    CANVAS_SIZE   = 160;
 
     private final Canvas canvas;
 
@@ -47,7 +44,7 @@ public class OghonDrawer {
         drawPico(fromPicoString(DEFAULT_OGHON));
     }
 
-    public void drawPico(long[][] data) {
+    public void drawPico(final long[][] data) {
         final List<OghonTri> tris = new ArrayList<>();
         int xScale = CANVAS_SIZE / data.length;
         int yScale = CANVAS_SIZE / data[0].length;
@@ -62,7 +59,8 @@ public class OghonDrawer {
             CompletableFuture.runAsync(() -> {
                 try {
                     Thread.sleep(20 + new Random().nextInt(80));
-                } catch (InterruptedException e) {
+                }
+                catch (InterruptedException e) {
                     // Do nothing
                 }
                 Platform.runLater(() -> drawPicoSquare(tri));
@@ -79,10 +77,10 @@ public class OghonDrawer {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         double[] x1s = {xs, xs, xs + xScale};
-        double[] y1s = tri.downSloped ? new double[] {ys, ys + yScale, ys + yScale} : new double[] {ys, ys + yScale, ys};
+        double[] y1s = tri.downSloped ? new double[]{ys, ys + yScale, ys + yScale} : new double[]{ys, ys + yScale, ys};
 
         double[] x2s = {xs, xs + xScale, xs + xScale};
-        double[] y2s = tri.downSloped ? new double[] {ys, ys + yScale, ys} : new double[] {ys + yScale, ys + yScale, ys};
+        double[] y2s = tri.downSloped ? new double[]{ys, ys + yScale, ys} : new double[]{ys + yScale, ys + yScale, ys};
 
         gc.setFill(tri.c1);
         gc.fillPolygon(x1s, y1s, 3);
@@ -94,7 +92,7 @@ public class OghonDrawer {
     private static class OghonTri {
         private final int x, y, xScale, yScale;
         private final boolean downSloped;
-        private final Color c1, c2;
+        private final Color   c1, c2;
 
         private OghonTri(int x, int y, int xScale, int yScale, long data) {
             this.x = x;

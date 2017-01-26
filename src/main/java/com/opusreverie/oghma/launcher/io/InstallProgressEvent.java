@@ -4,17 +4,15 @@ import java.text.MessageFormat;
 
 /**
  * Event specifying progress information for a particular install.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class InstallProgressEvent {
 
     private final double downloadPercent;
     private final double extractPercent;
 
-    public InstallProgressEvent(double downloadPercent, double extractPercent) {
+    InstallProgressEvent(double downloadPercent, double extractPercent) {
         this.downloadPercent = downloadPercent;
         this.extractPercent = extractPercent;
     }

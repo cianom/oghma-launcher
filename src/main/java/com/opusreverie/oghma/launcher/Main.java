@@ -8,18 +8,16 @@ import javafx.stage.Stage;
 
 /**
  * Entry point of launcher.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class Main extends Application {
 
     private static final String TITLE = "oghma";
 
     @Override
-    public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
+    public void start(final Stage stage) throws Exception {
+        final Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
         stage.setTitle(TITLE);
         stage.setResizable(false);
         final Scene scene = new Scene(root);
@@ -28,7 +26,7 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         launch(args);
     }
 

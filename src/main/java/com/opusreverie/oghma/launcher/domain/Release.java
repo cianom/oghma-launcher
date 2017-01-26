@@ -11,10 +11,8 @@ import java.util.Objects;
 
 /**
  * Information on an available binary release and its related content.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class Release {
 
@@ -114,7 +112,7 @@ public class Release {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Release release = (Release) o;

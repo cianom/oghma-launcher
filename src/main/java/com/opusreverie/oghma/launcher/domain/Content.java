@@ -7,10 +7,8 @@ import java.util.Objects;
 
 /**
  * Information about a remote file that's available for download.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class Content {
 
@@ -27,8 +25,8 @@ public class Content {
     private final String sha256Hash;
 
     @JsonCreator
-    public Content(@JsonProperty("url") String url, @JsonProperty("path") String path,
-                   @JsonProperty("size") long sizeBytes, @JsonProperty("hash") String sha256Hash) {
+    public Content(@JsonProperty("url") final String url, @JsonProperty("path") final String path,
+                   @JsonProperty("size") final long sizeBytes, @JsonProperty("hash") final String sha256Hash) {
         this.url = url;
         this.path = path;
         this.sizeBytes = sizeBytes;
@@ -52,7 +50,7 @@ public class Content {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Content content = (Content) o;
@@ -65,4 +63,5 @@ public class Content {
     public int hashCode() {
         return Objects.hash(path, sizeBytes, sha256Hash);
     }
+
 }

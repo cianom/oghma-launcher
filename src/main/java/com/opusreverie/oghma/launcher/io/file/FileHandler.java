@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 
 /**
  * Handler for basic filesystem operations.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class FileHandler {
 

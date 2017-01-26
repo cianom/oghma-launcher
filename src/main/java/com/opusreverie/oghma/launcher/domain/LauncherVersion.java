@@ -6,10 +6,8 @@ import io.lyra.oghma.common.content.SemanticVersion;
 
 /**
  * Information on the latest launcher version.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class LauncherVersion {
 

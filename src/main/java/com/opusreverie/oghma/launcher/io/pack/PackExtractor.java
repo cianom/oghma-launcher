@@ -17,13 +17,11 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Extracts pack contents into their relevant filesystem directories.
- * <p/>
+ * <p>
  * The extractor first extracts all content into memory, and then sequentially writes each file to disk.
  * If a failure is encountered at any point, all of the installed files should be rolled back.
- * <p/>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class PackExtractor {
 

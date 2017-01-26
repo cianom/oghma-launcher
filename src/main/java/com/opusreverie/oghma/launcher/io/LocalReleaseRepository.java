@@ -19,10 +19,8 @@ import java.util.stream.Collectors;
 
 /**
  * Finds releases already installed on the local filesystem.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class LocalReleaseRepository {
 
@@ -33,7 +31,8 @@ public class LocalReleaseRepository {
 
     private final FileHandler fileHandler;
 
-    public LocalReleaseRepository(Decoder decoder, DirectoryResolver dirResolver, FileHandler fileHandler) {
+    public LocalReleaseRepository(final Decoder decoder, final DirectoryResolver dirResolver,
+                                  final FileHandler fileHandler) {
         this.decoder = decoder;
         this.dirResolver = dirResolver;
         this.fileHandler = fileHandler;

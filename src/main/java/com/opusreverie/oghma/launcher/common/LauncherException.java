@@ -4,22 +4,20 @@ import io.lyra.oghma.common.OghmaException;
 
 /**
  * Generic unchecked Launcher exception.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class LauncherException extends OghmaException {
 
-    public LauncherException(String message) {
+    public LauncherException(final String message) {
         super(message);
     }
 
-    public LauncherException(String message, Throwable cause) {
+    public LauncherException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public LauncherException(Throwable cause) {
+    public LauncherException(final Throwable cause) {
         super(cause);
     }
 

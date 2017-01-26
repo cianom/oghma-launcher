@@ -4,10 +4,8 @@ import javafx.scene.control.ListCell;
 
 /**
  * List Cell with CSS font formatting.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class CssListCell<T> extends ListCell<T> {
 
@@ -26,7 +24,8 @@ public class CssListCell<T> extends ListCell<T> {
         if (empty || item == null) {
             // styled like -fx-prompt-text-fill:
             setStyle("-fx-text-fill: derive(-fx-control-inner-background,-30%)");
-        } else {
+        }
+        else {
             setStyle("-fx-text-fill: " + textColor);
             setText(item.toString());
         }

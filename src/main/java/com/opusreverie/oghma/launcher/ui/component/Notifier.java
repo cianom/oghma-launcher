@@ -13,10 +13,8 @@ import javafx.util.Duration;
 
 /**
  * Notification service to present user with helpful event notifications.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class Notifier {
 
@@ -24,6 +22,7 @@ public class Notifier {
         INFO(Color.web("#55CCFF")), WARN(Color.ORANGE), ERROR(Color.RED);
 
         private Color color;
+
         NotificationType(Color color) {
             this.color = color;
         }

@@ -14,19 +14,17 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Retrieves latest release information from remote hosted services.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class BaseRestService {
 
     private static final int INITIAL_BACKOFF_MILLIS = 3_000;
-    private static final int MAX_BACKOFF_MILLIS = 20_000;
+    private static final int MAX_BACKOFF_MILLIS     = 20_000;
 
     private final String host;
 
-    protected BaseRestService(final String host) {
+    BaseRestService(final String host) {
         this.host = host;
     }
 
@@ -34,7 +32,7 @@ public class BaseRestService {
         return request(uri).get(clazz);
     }
 
-    protected <T> T get(final GenericType<T> type, final String uri) {
+    private <T> T get(final GenericType<T> type, final String uri) {
         return request(uri).get(type);
     }
 
@@ -50,12 +48,13 @@ public class BaseRestService {
         return target.request(MediaType.APPLICATION_JSON);
     }
 
-    protected <T> CompletableFuture<T> getWithRetry(final GenericType<T> type, final String uri, final long delayMillis) {
+    <T> CompletableFuture<T> getWithRetry(final GenericType<T> type, final String uri, final long delayMillis) {
         return CompletableFuture.supplyAsync(() -> getWithDelay(type, uri, delayMillis))
                 .handle((list, ex) -> {
                     if (ex == null) {
                         return CompletableFuture.completedFuture(list);
-                    } else {
+                    }
+                    else {
                         System.out.println(ex.getMessage());
                         long backOff = Math.min(MAX_BACKOFF_MILLIS, Math.max(INITIAL_BACKOFF_MILLIS, delayMillis + 1000));
                         return getWithRetry(type, uri, backOff);
@@ -64,12 +63,13 @@ public class BaseRestService {
                 .thenCompose(x -> x);
     }
 
-    protected <T> T getWithDelay(final GenericType<T> type, final String uri, final long delayMillis) {
+    private <T> T getWithDelay(final GenericType<T> type, final String uri, final long delayMillis) {
         try {
             if (delayMillis > 0) {
                 Thread.sleep(delayMillis);
             }
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             e.printStackTrace();
         }
         return get(type, uri);

@@ -7,10 +7,8 @@ import java.util.Set;
 
 /**
  * Release object decorated with availability information.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
 
@@ -80,17 +78,9 @@ public class AvailabilityRelease implements Comparable<AvailabilityRelease> {
     }
 
     /**
-     * Compares two version strings.
-     * <p/>
-     * Use this instead of String.compareTo() for a non-lexicographical
-     * comparison that works for version strings. e.g. "1.10".compareTo("1.6").
-     * <p/>
-     * Note: It does not work if "1.10" is supposed to be equal to "1.10.0".
+     * Compares two releases using their semantic versions.
      *
-     * @param o the other release to compare against.
-     * @return The result is a negative integer if str1 is _numerically_ less than str2.
-     * The result is a positive integer if str1 is _numerically_ greater than str2.
-     * The result is zero if the strings are _numerically_ equal.
+     * @see SemanticVersion#compareTo(Object).
      */
     @Override
     public int compareTo(final AvailabilityRelease o) {

@@ -7,10 +7,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Retrieves latest launcher version information from remote hosted services.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class LauncherVersionService extends BaseRestService {
 

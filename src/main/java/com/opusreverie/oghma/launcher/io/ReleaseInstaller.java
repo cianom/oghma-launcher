@@ -24,18 +24,16 @@ import static com.opusreverie.oghma.launcher.io.download.FileDownloader.Download
  * Installs content to the local filesystem from a remote source.
  * <p>
  * This includes downloading the content, hash validation and extracting any pack files.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class ReleaseInstaller {
 
-    private final FileDownloader         fileDownloader;
-    private final PackExtractor          packExtractor;
-    private final LocalReleaseRepository releaseRepository;
-    private final DirectoryResolver      dirResolver;
-    private final ConcurrentHashMap<Release, Observable<InstallProgressEvent>> fileLocks = new ConcurrentHashMap<>();
+    private final FileDownloader                                               fileDownloader;
+    private final PackExtractor                                                packExtractor;
+    private final LocalReleaseRepository                                       releaseRepository;
+    private final DirectoryResolver                                            dirResolver;
+    private final ConcurrentHashMap<Release, Observable<InstallProgressEvent>> fileLocks;
 
     public ReleaseInstaller(final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
         this(new FileDownloader(dirResolver), new PackExtractor(dirResolver), releaseRepository, dirResolver);
@@ -43,6 +41,7 @@ public class ReleaseInstaller {
 
     public ReleaseInstaller(final FileDownloader fileDownloader, final PackExtractor packExtractor,
                             final LocalReleaseRepository releaseRepository, final DirectoryResolver dirResolver) {
+        this.fileLocks = new ConcurrentHashMap<>();
         this.fileDownloader = fileDownloader;
         this.packExtractor = packExtractor;
         this.releaseRepository = releaseRepository;
@@ -64,7 +63,6 @@ public class ReleaseInstaller {
     }
 
     private void install(final Release release, final Subscriber<? super InstallProgressEvent> subscriber) {
-        // Binary
         try {
             final Install install = new Install(release);
 
@@ -84,7 +82,8 @@ public class ReleaseInstaller {
         }
     }
 
-    private void installFile(Subscriber<? super InstallProgressEvent> subscriber, Install install, Content file) {
+    private void installFile(final Subscriber<? super InstallProgressEvent> subscriber,
+                             final Install install, final Content file) {
         if (!subscriber.isUnsubscribed()) {
             final Action1<DownloadProgressEvent> handler = prog -> subscriber
                     .onNext(install.updateDownloadProgress(file, prog.getDownloadedBytes()).getProgress());
@@ -111,11 +110,11 @@ public class ReleaseInstaller {
                 && ContentType.isPack(file.getPath());
     }
 
-    private boolean lock(Release release, Observable<InstallProgressEvent> stream) {
+    private boolean lock(final Release release, final Observable<InstallProgressEvent> stream) {
         return fileLocks.putIfAbsent(release, stream) == null;
     }
 
-    private void unlock(Release release) {
+    private void unlock(final Release release) {
         fileLocks.remove(release);
     }
 

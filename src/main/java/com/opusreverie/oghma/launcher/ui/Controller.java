@@ -1,5 +1,6 @@
 package com.opusreverie.oghma.launcher.ui;
 
+import com.opusreverie.oghma.launcher.common.LauncherConfigOption;
 import com.opusreverie.oghma.launcher.converter.Decoder;
 import com.opusreverie.oghma.launcher.domain.AvailabilityRelease;
 import com.opusreverie.oghma.launcher.domain.LauncherVersion;
@@ -15,6 +16,10 @@ import com.opusreverie.oghma.launcher.ui.component.Notifier;
 import com.opusreverie.oghma.launcher.ui.component.Notifier.NotificationType;
 import com.opusreverie.oghma.launcher.ui.component.OghonDrawer;
 import io.lyra.oghma.common.OghmaException;
+import io.lyra.oghma.common.config.ConfigOption;
+import io.lyra.oghma.common.config.OghmaConfig;
+import io.lyra.oghma.common.config.PreferenceOghmaConfig;
+import io.lyra.oghma.common.config.StandardConfigOption;
 import io.lyra.oghma.common.content.SemanticVersion;
 import io.lyra.oghma.common.io.DirectoryResolver;
 import io.lyra.oghma.common.io.FileSystemInitializer;
@@ -29,6 +34,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rx.Subscription;
 
 import java.io.BufferedReader;
@@ -38,45 +45,42 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.prefs.Preferences;
 
 /**
  * UI controller that coordinates between UI components and services layer.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class Controller implements Initializable {
 
-    private static final String       VERSION                = "0.1.0";
-    private static final String       OGHMA_SELECTED_RELEASE = "last.selected.release";
-    private static final String       PROPERTY_WINDOWED      = "oghma.windowed";
-    private final        Set<Release> downloaded             = new HashSet<>();
+    private static final Logger LOG     = LoggerFactory.getLogger(Controller.class);
+    private static final String VERSION = "0.1.0";
+
+    private final Set<Release>     downloaded;
     private final ReleaseInstaller installer;
 
     @FXML
-    Canvas                        picoCanvas;
+    private Canvas                        picoCanvas;
     @FXML
-    Button                        playButton;
+    private Button                        playButton;
     @FXML
-    Button                        downloadButton;
+    private Button                        downloadButton;
     @FXML
-    Button                        cancelDownloadButton;
+    private Button                        cancelDownloadButton;
     @FXML
-    Pane                          pane;
+    private Pane                          pane;
     @FXML
-    Label                         versionLabel;
+    private Label                         versionLabel;
     @FXML
-    ComboBox<AvailabilityRelease> versions;
+    private ComboBox<AvailabilityRelease> versions;
     @FXML
-    HBox                          notificationBox;
+    private HBox                          notificationBox;
     @FXML
-    ImageView                     connectivityIcon;
+    private ImageView                     connectivityIcon;
     @FXML
-    ImageView                     newIcon;
+    private ImageView                     newIcon;
     @FXML
-    CheckBox                      chkWindowed;
+    private CheckBox                      chkWindowed;
 
     private Notifier notifier;
 
@@ -89,9 +93,10 @@ public class Controller implements Initializable {
     private LocalReleaseRepository releaseRepository;
 
     public Controller() {
-        dirResolver = DirectoryResolver.ofDefaultRoot();
-        releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
-        installer = new ReleaseInstaller(releaseRepository, dirResolver);
+        this.downloaded = new HashSet<>();
+        this.dirResolver = DirectoryResolver.ofDefaultRoot();
+        this.releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
+        this.installer = new ReleaseInstaller(releaseRepository, dirResolver);
     }
 
     @Override
@@ -113,8 +118,8 @@ public class Controller implements Initializable {
         downloadButton.setOnAction(evt -> startDownload(versions.getSelectionModel().getSelectedItem()));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setOnAction(evt -> cancelDownload(versions.getSelectionModel().getSelectedItem()));
-        chkWindowed.setSelected(isWindowed());
-        chkWindowed.selectedProperty().addListener((observable, oldValue, newValue) -> setWindowed(newValue));
+        chkWindowed.setSelected(isFullscreen());
+        chkWindowed.selectedProperty().addListener((observable, oldValue, newValue) -> setFullscreen(newValue));
         Tooltip.install(chkWindowed, new Tooltip("run oghma in windowed mode"));
 
         try {
@@ -154,9 +159,6 @@ public class Controller implements Initializable {
     private List<String> constructPlayCommand(final File jarPath) {
         final List<String> cmd = new ArrayList<>();
         cmd.add("java");
-        if (isWindowed()) {
-            cmd.add("-D" + PROPERTY_WINDOWED + "=true");
-        }
         cmd.add("-jar");
         cmd.add(jarPath.getAbsolutePath());
         return cmd;
@@ -168,7 +170,7 @@ public class Controller implements Initializable {
         final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getDirectory());
         try {
             final Process process = new ProcessBuilder(constructPlayCommand(jarFile)).start();
-            preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
+            config().put(LauncherConfigOption.SELECTED_RELEASE, release.getRelease().getVersion());
             final int exitCode = process.waitFor();
 
             if (exitCode == 0) {
@@ -193,7 +195,7 @@ public class Controller implements Initializable {
         if (release == null) return;
         Platform.runLater(() -> notifier.notify("Starting download " + release, NotificationType.INFO));
         setUIDownloadState(true, false, false, true);
-        preferences().put(OGHMA_SELECTED_RELEASE, release.getRelease().getVersion());
+        setOptionValue(LauncherConfigOption.SELECTED_RELEASE, release.getRelease().getVersion());
         activeInstallation = installer.install(release.getRelease())
                 .subscribe(this::updateProgress, ex -> downloadFailed(release, ex), () -> downloadCompleted(release));
     }
@@ -295,7 +297,7 @@ public class Controller implements Initializable {
 
     private void selectReleasePreference() {
         if (!versions.getItems().isEmpty()) {
-            final String preferredVersion = preferences().get(OGHMA_SELECTED_RELEASE, null);
+            final String preferredVersion = config().get(LauncherConfigOption.SELECTED_RELEASE);
             final AvailabilityRelease toSelect = versions.getItems().stream()
                     .filter(ar -> Objects.equals(preferredVersion, ar.getRelease().getVersion()))
                     .findFirst().orElse(versions.getItems().get(0));
@@ -315,16 +317,25 @@ public class Controller implements Initializable {
         versions.setButtonCell(new CssListCell<>("#FFFFFF"));
     }
 
-    private Preferences preferences() {
-        return Preferences.userRoot().node("io.lyra.oghma.launcher");
+    private OghmaConfig config() {
+        return new PreferenceOghmaConfig();
     }
 
-    private boolean isWindowed() {
-        return preferences().getBoolean(PROPERTY_WINDOWED, false);
+    private boolean isFullscreen() {
+        return config().getBoolean(StandardConfigOption.FULLSCREEN, true);
     }
 
-    private void setWindowed(final boolean windowed) {
-        preferences().putBoolean(PROPERTY_WINDOWED, windowed);
+    private void setFullscreen(final boolean fullscreen) {
+        setOptionValue(StandardConfigOption.FULLSCREEN, Boolean.toString(fullscreen));
+    }
+
+    private void setOptionValue(final ConfigOption option, final String value) {
+        try {
+            config().put(option, value);
+        }
+        catch (final IOException e) {
+            LOG.error("Could not set option " + option, e);
+        }
     }
 
 }

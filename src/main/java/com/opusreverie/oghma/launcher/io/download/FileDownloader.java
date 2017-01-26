@@ -21,10 +21,8 @@ import java.util.Objects;
 
 /**
  * Downloads a specified file and performs hash validation once complete.
- * <p>
- * Copyright © 2016 Cian O'Mahony. All rights reserved.
  *
- * @author Cian O'Mahony
+ * @author Cian.
  */
 public class FileDownloader {
 
@@ -137,16 +135,14 @@ public class FileDownloader {
 
     /**
      * Event specifying progress information for a particular download.
-     * <p>
-     * Copyright © 2016 Cian O'Mahony. All rights reserved.
      *
-     * @author Cian O'Mahony
+     * @author Cian.
      */
     public static class DownloadProgressEvent {
 
         private final long downloadedBytes;
 
-        public DownloadProgressEvent(long downloadedBytes) {
+        public DownloadProgressEvent(final long downloadedBytes) {
             this.downloadedBytes = downloadedBytes;
         }
 

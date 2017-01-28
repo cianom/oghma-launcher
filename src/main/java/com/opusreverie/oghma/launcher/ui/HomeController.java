@@ -11,15 +11,11 @@ import com.opusreverie.oghma.launcher.io.ReleaseInstaller;
 import com.opusreverie.oghma.launcher.io.file.FileHandler;
 import com.opusreverie.oghma.launcher.io.http.LauncherVersionService;
 import com.opusreverie.oghma.launcher.io.http.ReleaseService;
-import com.opusreverie.oghma.launcher.ui.component.CssListCell;
 import com.opusreverie.oghma.launcher.ui.component.Notifier;
 import com.opusreverie.oghma.launcher.ui.component.Notifier.NotificationType;
 import com.opusreverie.oghma.launcher.ui.component.OghonDrawer;
+import com.opusreverie.oghma.launcher.ui.component.StyleUtil;
 import io.lyra.oghma.common.OghmaException;
-import io.lyra.oghma.common.config.ConfigOption;
-import io.lyra.oghma.common.config.OghmaConfig;
-import io.lyra.oghma.common.config.PreferenceOghmaConfig;
-import io.lyra.oghma.common.config.StandardConfigOption;
 import io.lyra.oghma.common.content.SemanticVersion;
 import io.lyra.oghma.common.io.DirectoryResolver;
 import io.lyra.oghma.common.io.FileSystemInitializer;
@@ -29,13 +25,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rx.Subscription;
 
 import java.io.BufferedReader;
@@ -51,9 +48,8 @@ import java.util.*;
  *
  * @author Cian.
  */
-public class Controller implements Initializable {
+public class HomeController extends BaseLauncherController implements Initializable {
 
-    private static final Logger LOG     = LoggerFactory.getLogger(Controller.class);
     private static final String VERSION = "0.1.0";
 
     private final Set<Release>     downloaded;
@@ -79,8 +75,6 @@ public class Controller implements Initializable {
     private ImageView                     connectivityIcon;
     @FXML
     private ImageView                     newIcon;
-    @FXML
-    private CheckBox                      chkWindowed;
 
     private Notifier notifier;
 
@@ -92,7 +86,7 @@ public class Controller implements Initializable {
 
     private LocalReleaseRepository releaseRepository;
 
-    public Controller() {
+    public HomeController() {
         this.downloaded = new HashSet<>();
         this.dirResolver = DirectoryResolver.ofDefaultRoot();
         this.releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
@@ -101,14 +95,14 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/backend");
+        final String serviceUri = System.getProperty("oghma.backend.url", "oghma.io/");
 
         pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         oghonDrawer = new OghonDrawer(picoCanvas);
         notifier = new Notifier(notificationBox);
 
         oghonDrawer.drawDefault();
-        setComboStyle();
+        StyleUtil.setComboTextColor(versions, "#FFFFFF");
         newIcon.managedProperty().bind(newIcon.visibleProperty());
         Tooltip.install(newIcon, new Tooltip("found new releases available to download"));
 
@@ -118,9 +112,6 @@ public class Controller implements Initializable {
         downloadButton.setOnAction(evt -> startDownload(versions.getSelectionModel().getSelectedItem()));
         cancelDownloadButton.managedProperty().bind(cancelDownloadButton.visibleProperty());
         cancelDownloadButton.setOnAction(evt -> cancelDownload(versions.getSelectionModel().getSelectedItem()));
-        chkWindowed.setSelected(isFullscreen());
-        chkWindowed.selectedProperty().addListener((observable, oldValue, newValue) -> setFullscreen(newValue));
-        Tooltip.install(chkWindowed, new Tooltip("run oghma in windowed mode"));
 
         try {
             new FileSystemInitializer(dirResolver).setUpFileSystemStructure();
@@ -305,7 +296,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private void updateConnectivity(boolean connectivity) {
+    private void updateConnectivity(final boolean connectivity) {
         final Tooltip tt = new Tooltip(connectivity ? "has connectivity" : "no connectivity to download new versions");
         Tooltip.install(connectivityIcon, tt);
         final String iconPath = MessageFormat.format("/icon/{0}connectivity.png", connectivity ? "" : "no_");
@@ -313,29 +304,5 @@ public class Controller implements Initializable {
         connectivityIcon.setVisible(true);
     }
 
-    private void setComboStyle() {
-        versions.setButtonCell(new CssListCell<>("#FFFFFF"));
-    }
-
-    private OghmaConfig config() {
-        return new PreferenceOghmaConfig();
-    }
-
-    private boolean isFullscreen() {
-        return config().getBoolean(StandardConfigOption.FULLSCREEN, true);
-    }
-
-    private void setFullscreen(final boolean fullscreen) {
-        setOptionValue(StandardConfigOption.FULLSCREEN, Boolean.toString(fullscreen));
-    }
-
-    private void setOptionValue(final ConfigOption option, final String value) {
-        try {
-            config().put(option, value);
-        }
-        catch (final IOException e) {
-            LOG.error("Could not set option " + option, e);
-        }
-    }
 
 }

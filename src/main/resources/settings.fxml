@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane alignment="center" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8"
+          xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.opusreverie.oghma.launcher.ui.SettingsController">
+    <columnConstraints>
+        <ColumnConstraints/>
+        <ColumnConstraints/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints/>
+        <RowConstraints/>
+    </rowConstraints>
+    <children>
+        <Pane fx:id="pane" minHeight="394.0" minWidth="394.0" prefHeight="394.0" prefWidth="394.0"
+              style="-fx-background-color: #FFFFFF;" GridPane.columnIndex="1">
+            <children>
+                <VBox layoutX="30.0" layoutY="27.0" prefWidth="339.0" style="-fx-background-color: transparent;">
+                    <children>
+                        <SplitPane dividerPositions="0.29797979797979796" prefWidth="200.0"
+                                   style="-fx-background-color: transparent;">
+                            <items>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="100.0"
+                                            style="-fx-background-color: transparent;">
+                                    <children>
+                                        <Label alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="96.0"
+                                               style="-fx-background-color: transparent;" text="Fullscreen"/>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="100.0"
+                                            style="-fx-background-color: transparent;">
+                                    <children>
+                                        <CheckBox fx:id="chkFullscreen" mnemonicParsing="false"
+                                                  style="-fx-background-color: transparent;"/>
+                                    </children>
+                                </AnchorPane>
+                            </items>
+                            <padding>
+                                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+                            </padding>
+                        </SplitPane>
+                        <SplitPane dividerPositions="0.29797979797979796" prefWidth="200.0"
+                                   style="-fx-background-color: transparent;">
+                            <items>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="100.0"
+                                            style="-fx-background-color: transparent;">
+                                    <children>
+                                        <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="31.0"
+                                               prefWidth="96.0" text="Resolution" textAlignment="RIGHT"/>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="100.0">
+                                    <children>
+                                        <ComboBox fx:id="cboResolutions" prefHeight="25.0" prefWidth="150.0"
+                                                  style="-fx-background-color: #55CCFF;"/>
+                                    </children>
+                                </AnchorPane>
+                            </items>
+                            <VBox.margin>
+                                <Insets/>
+                            </VBox.margin>
+                            <padding>
+                                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+                            </padding>
+                        </SplitPane>
+                    </children>
+                </VBox>
+            </children>
+        </Pane>
+    </children>
+</GridPane>

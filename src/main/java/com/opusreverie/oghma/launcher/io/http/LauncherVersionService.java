@@ -12,12 +12,14 @@ import java.util.concurrent.CompletableFuture;
  */
 public class LauncherVersionService extends BaseRestService {
 
+    private static final String LAUNCHER_META_FILE = "launcher.json";
+
     public LauncherVersionService(String host) {
         super(host);
     }
 
     public CompletableFuture<LauncherVersion> getLatestVersionWithRetry() {
-        return getWithRetry(new GenericType<LauncherVersion>() {}, "launcher/version", 0);
+        return getWithRetry(new GenericType<LauncherVersion>() {}, LAUNCHER_META_FILE, 0);
     }
 
 }

@@ -19,7 +19,7 @@ public class ReleaseService extends BaseRestService {
     }
 
     public CompletableFuture<List<Release>> getReleasesWithRetry() {
-        return getWithRetry(new GenericType<List<Release>>() {}, "release", 0);
+        return getWithRetry(new GenericType<List<Release>>() {}, "releases.json", 0);
     }
 
 

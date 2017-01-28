@@ -12,3 +12,10 @@
 .check-box>.box:hover {
   -fx-background-color: rgba(150, 200, 255, 1);
 }
+
+.split-pane *.split-pane-divider {
+    -fx-padding: 0 1 0 1;
+}
+.split-pane-divider {
+   -fx-background-color: transparent;
+}

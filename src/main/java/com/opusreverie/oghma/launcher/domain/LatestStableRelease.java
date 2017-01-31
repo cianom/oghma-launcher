@@ -22,8 +22,18 @@ public class LatestStableRelease extends Release {
     }
 
     @Override
+    public String getConcreteVersion() {
+        return referencedVersion;
+    }
+
+    @Override
     public String toString() {
         return MessageFormat.format("Latest Stable ({0})", referencedVersion);
+    }
+
+    @Override
+    public Release toConcrete() {
+        return new Release(referencedVersion, getName(), getReleasedOn(), getOghon(), isSnapshot(), getBinary(), getContent());
     }
 
 }

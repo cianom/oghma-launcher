@@ -39,14 +39,15 @@ public class LocalReleaseRepository {
     }
 
     void writeReleaseMeta(final Release release) throws IOException {
-        final String identifier = release.getDirectory();
+        final Release normalized = release.toConcrete();
+        final String identifier = normalized.getDirectory();
 
         final Path releaseDir = dirResolver.getReleaseDir(identifier);
         fileHandler.createDirectories(releaseDir);
 
         final Path outPath = dirResolver.getReleaseMeta(identifier).toPath();
         try (final OutputStream out = fileHandler.getOutputStream(outPath)) {
-            decoder.write(out, release);
+            decoder.write(out, normalized);
         }
     }
 

@@ -52,8 +52,9 @@ public class HomeController extends BaseLauncherController implements Initializa
 
     private static final String VERSION = "0.1.0";
 
-    private final Set<Release>     downloaded;
-    private final ReleaseInstaller installer;
+    private final Set<Release>             downloaded;
+    private final Set<AvailabilityRelease> available;
+    private final ReleaseInstaller         installer;
 
     @FXML
     private Canvas                        picoCanvas;
@@ -88,6 +89,7 @@ public class HomeController extends BaseLauncherController implements Initializa
 
     public HomeController() {
         this.downloaded = new HashSet<>();
+        this.available = new HashSet<>();
         this.dirResolver = DirectoryResolver.ofDefaultRoot();
         this.releaseRepository = new LocalReleaseRepository(new Decoder(), dirResolver, new FileHandler());
         this.installer = new ReleaseInstaller(releaseRepository, dirResolver);
@@ -205,6 +207,10 @@ public class HomeController extends BaseLauncherController implements Initializa
 
     private void downloadCompleted(final AvailabilityRelease release) {
         release.setDownloaded(true);
+        // Set all releases with the same concrete release as download (eg. latest-stable).
+        available.stream()
+                .filter(r -> Objects.equals(r.getRelease().getConcreteVersion(), release.getRelease().getConcreteVersion()))
+                .forEach(r -> r.setDownloaded(true));
         Platform.runLater(() -> notifier.notify("Download completed " + release, NotificationType.INFO));
         setUIDownloadState(false, false, true, false);
     }
@@ -278,6 +284,8 @@ public class HomeController extends BaseLauncherController implements Initializa
 
         // Merge downloaded and available.
         final Set<AvailabilityRelease> selectable = presenter.merge(downloaded, available);
+        this.available.clear();
+        this.available.addAll(selectable);
 
         Platform.runLater(() -> {
             versions.setItems(FXCollections.observableArrayList(selectable));

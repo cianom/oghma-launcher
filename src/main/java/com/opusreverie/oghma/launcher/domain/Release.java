@@ -86,7 +86,7 @@ public class Release {
 
     @JsonIgnore
     public String getDirectory() {
-        return snapshot ? name.toLowerCase() : version;
+        return snapshot ? name.toLowerCase() : getConcreteVersion();
     }
 
     public boolean isExpiredSnapshot(final Release newer) {
@@ -103,6 +103,11 @@ public class Release {
 
     public List<Content> getContent() {
         return content;
+    }
+
+    @JsonIgnore
+    public String getConcreteVersion() {
+        return getVersion();
     }
 
     @Override
@@ -127,6 +132,16 @@ public class Release {
     @Override
     public int hashCode() {
         return Objects.hash(version, name, releasedOn, oghon, binary, content);
+    }
+
+    /**
+     * Ensures the returned object is a concrete release,
+     * and not a symbolic pointer release (eg. latest-stable).
+     *
+     * @return the normalized release.
+     */
+    public Release toConcrete() {
+        return this;
     }
 
 }

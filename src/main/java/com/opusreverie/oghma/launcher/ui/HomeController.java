@@ -160,23 +160,24 @@ public class HomeController extends BaseLauncherController implements Initializa
 
         final File jarFile = dirResolver.getReleaseBinary(release.getRelease().getDirectory());
         try {
-            final Process process = new ProcessBuilder(constructPlayCommand(jarFile)).start();
+            final Process process = new ProcessBuilder(constructPlayCommand(jarFile))
+                    .redirectErrorStream(true)
+                    .start();
             config().put(LauncherConfigOption.SELECTED_RELEASE, release.getRelease().getVersion());
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            while ((reader.readLine()) != null) {
+                // Do nothing.
+            }
             final int exitCode = process.waitFor();
 
-            if (exitCode == 0) {
+            if (exitCode == 0 || exitCode == -1) {
                 System.exit(0);
             }
             else {
                 notifier.notify("Game closed unexpectedly with code " + exitCode, NotificationType.ERROR);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    notifier.notify("Error: " + line, NotificationType.ERROR);
-                }
             }
         }
-        catch (IOException | InterruptedException e) {
+        catch (final IOException | InterruptedException e) {
             final String errorMsg = MessageFormat.format("Could not start version. Reason: [{0}]", e.getMessage());
             notifier.notify(errorMsg, NotificationType.ERROR);
         }
